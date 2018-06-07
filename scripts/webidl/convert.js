@@ -2,9 +2,7 @@
 
 "use strict";
 
-const path = require("path");
-const fs = require("fs");
-const rimraf = require("rimraf");
+const { resolve } = require("path");
 
 const Webidl2js = require("webidl2js");
 
@@ -14,31 +12,17 @@ const transformer = new Webidl2js({
 });
 
 function addDir(dir) {
-  const resolved = path.resolve(__dirname, dir);
-  transformer.addSource(resolved, resolved);
+  transformer.addSource(`idl/${dir}`, `imp/${dir}`);
 }
 
-addDir("../../lib/jsdom/living/traversal");
-addDir("../../lib/jsdom/living/events");
-addDir("../../lib/jsdom/living/attributes");
-addDir("../../lib/jsdom/living/window");
-addDir("../../lib/jsdom/living/nodes");
-addDir("../../lib/jsdom/living/navigator");
-addDir("../../lib/jsdom/living/file-api");
-addDir("../../lib/jsdom/living/xhr");
-addDir("../../lib/jsdom/living/domparsing");
-addDir("../../lib/jsdom/living/svg");
-addDir("../../lib/jsdom/living/aborting");
-addDir("../../lib/jsdom/living/websockets");
-addDir("../../lib/jsdom/living/hr-time");
-addDir("../../lib/jsdom/living/constraint-validation");
+addDir("abort-controller");
+addDir("dom-exception");
+addDir("event-target");
+addDir("events");
+addDir("file");
+addDir("form-data");
 
-
-const outputDir = path.resolve(__dirname, "../../lib/jsdom/living/generated/");
-
-// Clean up any old stuff lying around.
-rimraf.sync(outputDir);
-fs.mkdirSync(outputDir);
+const outputDir = resolve( "./lib");
 
 transformer.generate(outputDir)
   .catch(err => {
