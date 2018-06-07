@@ -12,6 +12,7 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@platformparity/dom-exception": "^1.0.0-wip.5",
     "abab": "^2.0.0",
     "acorn": "^5.5.3",
     "acorn-globals": "^4.1.0",

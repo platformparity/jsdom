@@ -1,9 +1,8 @@
 "use strict";
 const path = require("path");
 const whatwgURL = require("whatwg-url");
-const { domSymbolTree } = require("./living/helpers/internal-constants");
-const SYMBOL_TREE_POSITION = require("symbol-tree").TreePosition;
-const { parseURLToResultingURLRecord } = require("./living/helpers/document-base-url");
+const { domSymbolTree } = require("./helpers/internal-constants");
+const { parseURLToResultingURLRecord } = require("./helpers/document-base-url");
 
 exports.toFileUrl = function (fileName) {
   // Beyond just the `path.resolve`, this is mostly for the benefit of Windows,
@@ -163,6 +162,7 @@ exports.simultaneousIterators = function* (first, second) {
   }
 };
 
+/*
 exports.treeOrderSorter = function (a, b) {
   const compare = domSymbolTree.compareTreePosition(a, b);
 
@@ -177,9 +177,11 @@ exports.treeOrderSorter = function (a, b) {
   // disconnected or equal:
   return 0;
 };
+*/
 
 /* eslint-disable global-require */
 
+/*
 exports.Canvas = null;
 ["canvas", "canvas-prebuilt"].some(moduleName => {
   try {
@@ -193,3 +195,4 @@ exports.Canvas = null;
   }
   return exports.Canvas !== null;
 });
+*/

@@ -2,8 +2,8 @@
 
 const vm = require("vm");
 const conversions = require("webidl-conversions");
-const idlUtils = require("../generated/utils");
-const ErrorEvent = require("../generated/ErrorEvent");
+const idlUtils = require("../../lib/utils");
+const ErrorEvent = require("../../lib/ErrorEvent");
 const reportException = require("./runtime-script-errors");
 
 exports.appendHandler = function appendHandler(el, eventName) {
@@ -79,6 +79,7 @@ exports.setupForSimpleEventAccessors = (prototype, events) => {
 };
 
 // https://html.spec.whatwg.org/#event-handler-idl-attributes
+// FIXME: get rid of browser-specific stuff and drop `vm` dependency...
 exports.createEventAccessor = function createEventAccessor(obj, event) {
   Object.defineProperty(obj, "on" + event, {
     configurable: true,

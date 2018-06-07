@@ -1,7 +1,7 @@
 "use strict";
 const util = require("util");
-const idlUtils = require("../generated/utils");
-const ErrorEvent = require("../generated/ErrorEvent");
+const idlUtils = require("../../lib/utils");
+const ErrorEvent = require("../../lib/ErrorEvent");
 
 const errorReportingMode = Symbol("error reporting mode");
 
