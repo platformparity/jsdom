@@ -2,7 +2,7 @@
 
 const EventImpl = require("./Event-impl").implementation;
 
-const CustomEventInit = require("../generated/CustomEventInit");
+const CustomEventInit = require("../../lib/CustomEventInit");
 
 class CustomEventImpl extends EventImpl {
   initCustomEvent(type, bubbles, cancelable, detail) {

@@ -1,18 +1,20 @@
 "use strict";
-const idlUtils = require("../generated/utils");
-const { closest } = require("../helpers/traversal");
-const { isDisabled, isSubmittable, isButton, normalizeToCRLF } = require("../helpers/form-controls");
-const Blob = require("../generated/Blob.js");
-const File = require("../generated/File.js");
+const idlUtils = require("../../lib/utils");
+const Blob = require("../../lib/Blob.js");
+const File = require("../../lib/File.js");
 const conversions = require("webidl-conversions");
+/* const { closest } = require("../helpers/traversal"); */
+/* const { isDisabled, isSubmittable, isButton, normalizeToCRLF } = require("../helpers/form-controls"); */
 
 exports.implementation = class FormDataImpl {
   constructor(args) {
     this._entries = [];
 
+    /*
     if (args[0] !== undefined) {
       this._entries = constructTheFormDataSet(args[0]);
     }
+    */
   }
 
   append(name, value, filename) {
@@ -90,6 +92,7 @@ function createAnEntry(name, value, filename) {
   return entry;
 }
 
+/*
 function constructTheFormDataSet(form, submitter) {
   // https://html.spec.whatwg.org/multipage/forms.html#constructing-form-data-set
 
@@ -145,7 +148,7 @@ function constructTheFormDataSet(form, submitter) {
       if (field.files.length === 0) {
         formDataSet.push({ name, value: "", type: "application/octet-stream" });
       }
-    } /* skip plugins */ else {
+    } /* skip plugins  else {
       formDataSet.push({ name, value: field._getValue(), type });
     }
 
@@ -170,3 +173,4 @@ function constructTheFormDataSet(form, submitter) {
 
   return formDataSet;
 }
+*/

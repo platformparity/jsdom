@@ -1,6 +1,6 @@
 "use strict";
 
-const EventInit = require("../generated/EventInit");
+const EventInit = require("../../lib/EventInit");
 
 class EventImpl {
   constructor(args, privateData) {

@@ -1,10 +1,10 @@
 "use strict";
-const DOMException = require("domexception");
+const { DOMException } = require("@platformparity/dom-exception");
 const reportException = require("../helpers/runtime-script-errors");
 const { domSymbolTree } = require("../helpers/internal-constants");
-const idlUtils = require("../generated/utils");
+const idlUtils = require("../../lib/utils");
 
-const Event = require("../generated/Event").interface;
+const Event = require("../../lib/Event").interface;
 
 class EventTargetImpl {
   constructor() {
@@ -86,6 +86,7 @@ class EventTargetImpl {
     eventImpl._dispatchFlag = true;
     eventImpl.target = targetOverride || this;
 
+    /*
     const eventPath = [];
     let { target } = eventImpl;
     let targetParent = domSymbolTree.parent(target);
@@ -98,8 +99,10 @@ class EventTargetImpl {
       // https://html.spec.whatwg.org/#events-and-the-window-object
       eventPath.push(idlUtils.implForWrapper(target._defaultView));
     }
+    */
 
     eventImpl.eventPhase = Event.CAPTURING_PHASE;
+    /*
     for (let i = eventPath.length - 1; i >= 0; --i) {
       if (eventImpl._stopPropagationFlag) {
         break;
@@ -110,6 +113,7 @@ class EventTargetImpl {
       const eventListeners = objectImpl._eventListeners[eventImpl.type];
       invokeEventListeners(eventListeners, object, eventImpl);
     }
+    */
 
     eventImpl.eventPhase = Event.AT_TARGET;
 
@@ -122,6 +126,7 @@ class EventTargetImpl {
 
     if (eventImpl.bubbles) {
       eventImpl.eventPhase = Event.BUBBLING_PHASE;
+      /*
       for (let i = 0; i < eventPath.length; ++i) {
         if (eventImpl._stopPropagationFlag) {
           break;
@@ -132,6 +137,7 @@ class EventTargetImpl {
         const eventListeners = objectImpl._eventListeners[eventImpl.type];
         invokeEventListeners(eventListeners, object, eventImpl);
       }
+      */
     }
 
     eventImpl._dispatchFlag = false;
@@ -149,6 +155,8 @@ module.exports = {
 
 function invokeEventListeners(listeners, target, eventImpl) {
   const wrapper = idlUtils.wrapperForImpl(target);
+
+  /*
   const document = target._ownerDocument || (wrapper && (wrapper._document || wrapper._ownerDocument));
   // Will be falsy for windows that have closed
   if (!document) {
@@ -160,7 +168,10 @@ function invokeEventListeners(listeners, target, eventImpl) {
   if (wrapper._document && wrapper.constructor.name === "Window") {
     target = idlUtils.implForWrapper(wrapper._document)._defaultView;
   }
+  */
+
   eventImpl.currentTarget = target;
+
   if (!listeners) {
     return;
   }
@@ -193,6 +204,7 @@ function invokeEventListeners(listeners, target, eventImpl) {
         listener.callback.call(idlUtils.wrapperForImpl(eventImpl.currentTarget), idlUtils.wrapperForImpl(eventImpl));
       }
     } catch (e) {
+      // FIXME: `_ownerDocument` ??
       let window = null;
       if (wrapper && wrapper._document) {
         // Triggered by Window

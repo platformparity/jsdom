@@ -2,7 +2,7 @@
 
 const EventImpl = require("./Event-impl").implementation;
 
-const ErrorEventInit = require("../generated/ErrorEventInit");
+const ErrorEventInit = require("../../lib/ErrorEventInit");
 
 class ErrorEventImpl extends EventImpl {
 

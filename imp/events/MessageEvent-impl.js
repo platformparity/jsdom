@@ -2,7 +2,7 @@
 
 const EventImpl = require("./Event-impl").implementation;
 
-const MessageEventInit = require("../generated/MessageEventInit");
+const MessageEventInit = require("../../lib/MessageEventInit");
 
 class MessageEventImpl extends EventImpl {
   initMessageEvent(type, bubbles, cancelable, data, origin, lastEventId, source, ports) {

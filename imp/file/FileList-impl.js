@@ -1,6 +1,6 @@
 "use strict";
 
-const idlUtils = require("../generated/utils.js");
+const idlUtils = require("../../lib/utils.js");
 
 exports.implementation = class FileListImpl extends Array {
   constructor() {

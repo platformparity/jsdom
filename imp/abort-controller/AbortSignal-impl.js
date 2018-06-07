@@ -1,16 +1,16 @@
 "use strict";
 
 const { setupForSimpleEventAccessors } = require("../helpers/create-event-accessor");
-const EventTargetImpl = require("../events/EventTarget-impl").implementation;
+const EventTargetImpl = require("../event-target/EventTarget-impl").implementation;
 
-const Event = require("../generated/Event");
+const Event = require("../../lib/Event");
 
 class AbortSignalImpl extends EventTargetImpl {
   constructor(args, privateData) {
     super();
 
     // make event firing possible
-    this._ownerDocument = privateData.window.document;
+    // this._ownerDocument = privateData.window.document;
 
     this.aborted = false;
     this.abortAlgorithms = new Set();

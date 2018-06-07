@@ -1,6 +1,6 @@
 "use strict";
 const { EOL } = require("os");
-const Blob = require("../generated/Blob");
+const Blob = require("../../lib/Blob");
 
 function convertLineEndingsToNative(s) {
   return s.replace(/\r\n|\r|\n/g, EOL);

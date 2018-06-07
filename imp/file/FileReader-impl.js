@@ -3,9 +3,9 @@
 const whatwgEncoding = require("whatwg-encoding");
 const MIMEType = require("whatwg-mimetype");
 const querystring = require("querystring");
-const DOMException = require("domexception");
-const EventTargetImpl = require("../events/EventTarget-impl").implementation;
-const ProgressEvent = require("../generated/ProgressEvent");
+const { DOMException } = require("@platformparity/dom-exception");
+const EventTargetImpl = require("../event-target/EventTarget-impl").implementation;
+const ProgressEvent = require("../../lib/ProgressEvent");
 const { setupForSimpleEventAccessors } = require("../helpers/create-event-accessor");
 
 const READY_STATES = Object.freeze({
@@ -24,7 +24,7 @@ class FileReaderImpl extends EventTargetImpl {
     this.readyState = READY_STATES.EMPTY;
     this.result = null;
 
-    this._ownerDocument = privateData.window.document;
+    // this._ownerDocument = privateData.window.document;
     this._terminated = false;
   }
 

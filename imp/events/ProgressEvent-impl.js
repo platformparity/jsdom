@@ -2,7 +2,7 @@
 
 const EventImpl = require("./Event-impl").implementation;
 
-const ProgressEventInit = require("../generated/ProgressEventInit");
+const ProgressEventInit = require("../../lib/ProgressEventInit");
 
 class ProgressEventImpl extends EventImpl {
 
