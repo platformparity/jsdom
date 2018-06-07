@@ -16,7 +16,6 @@ function addDir(dir) {
 }
 
 addDir("abort-controller");
-addDir("dom-exception");
 addDir("event-target");
 addDir("events");
 addDir("file");
