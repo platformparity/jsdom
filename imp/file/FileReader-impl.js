@@ -4,9 +4,9 @@ const whatwgEncoding = require("whatwg-encoding");
 const MIMEType = require("whatwg-mimetype");
 const querystring = require("querystring");
 const { DOMException } = require("@platformparity/dom-exception");
-const EventTargetImpl = require("../event-target/EventTarget-impl").implementation;
-const ProgressEvent = require("../../lib/ProgressEvent");
-const { setupForSimpleEventAccessors } = require("../helpers/create-event-accessor");
+const EventTargetImpl = require("../event-target/EventTarget-impl.js").implementation;
+const ProgressEvent = require("../../lib/ProgressEvent.js");
+const { setupForSimpleEventAccessors } = require("../helpers/create-event-accessor.js");
 
 const READY_STATES = Object.freeze({
   EMPTY: 0,

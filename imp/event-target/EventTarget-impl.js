@@ -1,10 +1,10 @@
 "use strict";
 const { DOMException } = require("@platformparity/dom-exception");
-const reportException = require("../helpers/runtime-script-errors");
-const { domSymbolTree } = require("../helpers/internal-constants");
-const idlUtils = require("../../lib/utils");
+const reportException = require("../helpers/runtime-script-errors.js");
+const { domSymbolTree } = require("../helpers/internal-constants.js");
+const idlUtils = require("../../lib/utils.js");
 
-const Event = require("../../lib/Event").interface;
+const Event = require("../../lib/Event.js").interface;
 
 class EventTargetImpl {
   constructor() {

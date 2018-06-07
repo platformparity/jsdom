@@ -1,8 +1,8 @@
 "use strict";
 
-const EventImpl = require("./Event-impl").implementation;
+const EventImpl = require("./Event-impl.js").implementation;
 
-const ErrorEventInit = require("../../lib/ErrorEventInit");
+const ErrorEventInit = require("../../lib/ErrorEventInit.js");
 
 class ErrorEventImpl extends EventImpl {
 

@@ -2,9 +2,9 @@
 
 const vm = require("vm");
 const conversions = require("webidl-conversions");
-const idlUtils = require("../../lib/utils");
-const ErrorEvent = require("../../lib/ErrorEvent");
-const reportException = require("./runtime-script-errors");
+const idlUtils = require("../../lib/utils.js");
+const ErrorEvent = require("../../lib/ErrorEvent.js");
+const reportException = require("./runtime-script-errors.js");
 
 exports.appendHandler = function appendHandler(el, eventName) {
   el.addEventListener(eventName, event => {

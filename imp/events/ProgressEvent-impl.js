@@ -1,8 +1,8 @@
 "use strict";
 
-const EventImpl = require("./Event-impl").implementation;
+const EventImpl = require("./Event-impl.js").implementation;
 
-const ProgressEventInit = require("../../lib/ProgressEventInit");
+const ProgressEventInit = require("../../lib/ProgressEventInit.js");
 
 class ProgressEventImpl extends EventImpl {
 

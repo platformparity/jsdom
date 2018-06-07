@@ -1,9 +1,9 @@
 "use strict";
 
-const { setupForSimpleEventAccessors } = require("../helpers/create-event-accessor");
-const EventTargetImpl = require("../event-target/EventTarget-impl").implementation;
+const { setupForSimpleEventAccessors } = require("../helpers/create-event-accessor.js");
+const EventTargetImpl = require("../event-target/EventTarget-impl.js").implementation;
 
-const Event = require("../../lib/Event");
+const Event = require("../../lib/Event.js");
 
 class AbortSignalImpl extends EventTargetImpl {
   constructor(args, privateData) {

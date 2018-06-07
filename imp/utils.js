@@ -1,8 +1,8 @@
 "use strict";
 const path = require("path");
-const whatwgURL = require("whatwg-url");
-const { domSymbolTree } = require("./helpers/internal-constants");
-const { parseURLToResultingURLRecord } = require("./helpers/document-base-url");
+const { serializeURL, parseURL } = require("whatwg-url");
+const { domSymbolTree } = require("./helpers/internal-constants.js");
+const { parseURLToResultingURLRecord } = require("./helpers/document-base-url.js");
 
 exports.toFileUrl = function (fileName) {
   // Beyond just the `path.resolve`, this is mostly for the benefit of Windows,
@@ -135,11 +135,11 @@ exports.reflectURLAttribute = (elementImpl, contentAttributeName) => {
   if (urlRecord === null) {
     return attributeValue;
   }
-  return whatwgURL.serializeURL(urlRecord);
+  return serializeURL(urlRecord);
 };
 
 function isValidAbsoluteURL(str) {
-  return whatwgURL.parseURL(str) !== null;
+  return parseURL(str) !== null;
 }
 
 exports.isValidTargetOrigin = function (str) {
