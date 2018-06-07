@@ -1,2 +1,11 @@
 language: node_js
 node_js: node
+deploy:
+  provider: npm
+  email: mail@qwtel.com
+  api_key:
+    secure: GysFtmDV+aysb7bIkRx7HNMcx+vIP4LhonEwTy3zFm9rlycpmdOXaWeY+OIU4cR0/ZM7kjLWo+AgxiguyYLeHfvC7CPtxU7cN12LtQcbs1sqBoN3BEE5nKWIX6BaAfPYtID+qEv4n5H5jBxP8FaHXJiNWAh6nMFhhAF06Vfk/0qcKWKyOEmTHEGZlvUjEMjQ2MzgJyUW0GYFL1sP3C4Hy7I5f7aWD4GqdZow8j3JwrVJQ9S2z/EUkKqK8kr+9UH8xXraJWZtT/koV/qcQ791TUj3e6DayHIzeLTcjvTC4IUqUXhfxBKEQP0fB3/AZd+cEh3ecXXvVeSiFSCbIV0I9Tkg16sk1rUsI9jDMsMuY4onaK1eLIMtAXL+KayKzJ4dFIhn0GMhAUQ7p8pK6wWWtfcNcgNgZuUxlXQBnH8Paybae53MQ/ffFjdVEL7A1gQarTrT7Gvhv7LTKilO6FdL/JoFTGDRRn3lsUHb3cJEhqu49E+9Y980NRiNU0q2a0EuuYGQSDzNirqWaAU4mCqnz9o9P99t2asMDT2X2M1l2eY3S7XiUhy9RUXbrex34jNa95qXc2LhiS3gfGJ3E/Y/BUFbznCoY/ZG4QKZKo8kG45xk7rPRWwT3MeGICrv/Lm1Yb1CkpAbnVSvto7znkrcRg4AAzVMNJ23wmYZb3FHHI8=
+  on:
+    tags: true
+    repo: platformparity/jsdom
+  skip_cleanup: true
