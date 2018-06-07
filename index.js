@@ -3,7 +3,9 @@
 // events
 const Event = require("./lib/Event.js").interface;
 const CustomEvent = require("./lib/CustomEvent.js").interface;
-// TODO: expose other event types? which ones?
+const ErrorEvent = require("./lib/ErrorEvent.js").interface;
+const MessageEvent = require("./lib/MessageEvent.js").interface;
+const ProgressEvent = require("./lib/ProgressEvent.js").interface;
 
 // event-target
 const EventTarget = require("./lib/EventTarget.js").interface;
@@ -22,14 +24,21 @@ const AbortSignal = require("./lib/AbortSignal.js").interface;
 const FormData = require("./lib/FormData.js").interface;
 
 module.exports = {
-  AbortController,
-  AbortSignal,
-  Blob,
-  CustomEvent,
   Event,
+  CustomEvent,
+  ErrorEvent,
+  MessageEvent,
+  ProgressEvent,
+
   EventTarget,
+
+  Blob,
   File,
   FileList,
   FileReader,
+
+  AbortController,
+  AbortSignal,
+
   FormData
 };
