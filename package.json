@@ -20,6 +20,7 @@
     "whatwg-url": "^6.4.1"
   },
   "devDependencies": {
+    "prettier": "^1.13.4",
     "webidl2js": "jsdom/webidl2js#04fa082"
   },
   "scripts": {
