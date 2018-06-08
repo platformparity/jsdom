@@ -22,12 +22,12 @@ function find(map, name) {
 const MAP = Symbol('map');
 
 class HeadersImpl {
-	constructor(args) {
-		this[MAP] = new WeakMap();
-    const init = args[0];
+	constructor([init]) {
+		this[MAP] = Object.create(null);
 
 		if (init == null) {
 			// no op
+      // TODO: needed?
 		} else if (typeof init === 'object') {
 			const method = init[Symbol.iterator];
 			if (method != null) {

@@ -1,11 +1,61 @@
 "use strict";
 const { mixin } = require("../utils.js");
-const BodyImpl = require("./BodyImpl-impl.js").implementation;
+const { implementation: BodyImpl, clone } = require("./BodyImpl-impl.js");
+
+const Headers = require("../../lib/Headers.js");
+const Response = require("../../lib/Response.js");
+
+const { STATUS_CODES } = require('http');
+
+const INTERNALS = Symbol('Response internals');
 
 class ResponseImpl {
-  constructor() {
-    BodyImpl.initBody();
+  constructor(args) {
+    this.bodyConstructor(args);
+
+    const [body, init] = args;
+
+		const status = init.status
+
+		this[INTERNALS] = {
+			url: init.url,
+			status,
+			statusText: init.statusText || STATUS_CODES[status],
+			headers: Headers.createImpl([init.headers]),
+		};
   }
+
+	get url() {
+		return this[INTERNALS].url;
+	}
+
+	get status() {
+		return this[INTERNALS].status;
+	}
+
+	get ok() {
+		return this[INTERNALS].status >= 200 && this[INTERNALS].status < 300;
+	}
+
+	get statusText() {
+		return this[INTERNALS].statusText;
+	}
+
+	get headers() {
+		return this[INTERNALS].headers;
+	}
+
+	clone() {
+		const res = Response.createImpl([clone(this), {
+			status: this.status,
+			statusText: this.statusText,
+			headers: this.headers,
+		}]);
+
+    res[INTERNALS].url = this.url;
+
+    return res;
+	}
 }
 
 mixin(ResponseImpl.prototype, BodyImpl.prototype);

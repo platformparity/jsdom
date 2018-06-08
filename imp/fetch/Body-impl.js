@@ -10,11 +10,12 @@ try { convert = require('encoding').convert; } catch(e) {}
 const INTERNALS = Symbol('Body internals');
 
 class BodyImpl {
-  initBody(body, { size = 0, timeout = 0 } = {}) {
+  bodyConstructor([body]) {
+    // TODO: necessary?
   	if (!(body == null
       || typeof body === 'string'
       || isURLSearchParams(body)
-      || body instanceof Blob
+      || body instanceof Blob // FIXME: doesn't work
       || Buffer.isBuffer(body)
       || body instanceof ArrayBuffer
       || ArrayBuffer.isView(body)
@@ -31,8 +32,7 @@ class BodyImpl {
   		error: null,
   		rejectCurrentPromise: undefined
   	};
-  	this.size = size;
-  	this.timeout = timeout;
+  	this.size = 0; // FIXME: body size
 
   	if (body instanceof Stream) {
   		// handle stream error, such as incorrect content-encoding
@@ -67,15 +67,9 @@ class BodyImpl {
 
 	blob() {
 		let ct = this.headers && this.headers.get('content-type') || '';
-		return consumeBody.call(this).then(buf => Object.assign(
-			// Prevent copying
-			Blob.createImpl([], {
-				type: ct.toLowerCase()
-			}),
-			{
-				_buffer: buf
-			}
-		));
+		return consumeBody.call(this).then(buf =>
+      Blob.createImpl([[buf], { type: ct.toLowerCase() }])
+    );
 	}
 
 	formData() {
@@ -104,7 +98,7 @@ exports.implementation = BodyImpl;
  */
 function consumeBody() {
 	if (this[INTERNALS].disturbed) {
-		return Promise.reject(new TypeError(`body used already for: ${this.url}`));
+		return Promise.reject(new TypeError(`body stream already read`));
 	}
 
 	this[INTERNALS].disturbed = true;
@@ -124,7 +118,7 @@ function consumeBody() {
 	}
 
 	// body is blob
-	if (this.body instanceof Blob) {
+	if (this.body instanceof Blob) { //  FIXME: this doesn't work
 		return Promise.resolve(this.body._buffer);
 	}
 
@@ -150,16 +144,6 @@ function consumeBody() {
 	let abort = false;
 
 	return new Promise((resolve, reject) => {
-		let resTimeout;
-
-		// allow timeout on slow response body
-		if (this.timeout) {
-			resTimeout = setTimeout(() => {
-				abort = true;
-				reject(new Error(`Response timeout while trying to fetch ${this.url} (over ${this.timeout}ms)`, 'body-timeout'));
-			}, this.timeout);
-		}
-
 		this[INTERNALS].rejectCurrentPromise = reject;
 
 		this.body.on('data', chunk => {
@@ -337,7 +321,7 @@ exports.extractContentType = function extractContentType(instance) {
 	} else if (isURLSearchParams(body)) {
 	 	// body is a URLSearchParams
 		return 'application/x-www-form-urlencoded;charset=UTF-8';
-	} else if (body instanceof Blob) {
+	} else if (body instanceof Blob) { // FIXME: this doesn't work
 		// body is blob
 		return body.type || null;
 	} else if (Buffer.isBuffer(body)) {
@@ -381,7 +365,7 @@ exports.getTotalBytes = function getTotalBytes(instance) {
 	} else if (isURLSearchParams(body)) {
 		// body is URLSearchParams
 		return Buffer.byteLength(String(body));
-	} else if (body instanceof Blob) {
+	} else if (body instanceof Blob) { // FIXME: This doesn't work
 		// body is blob
 		return body.size;
 	} else if (Buffer.isBuffer(body)) {
@@ -427,7 +411,7 @@ exports.writeToStream = function writeToStream(dest, instance) {
 		// body is URLSearchParams
 		dest.write(Buffer.from(String(body)));
 		dest.end();
-	} else if (body instanceof Blob) {
+	} else if (body instanceof Blob) { // FIXME: This doens't work
 		// body is blob
 		dest.write(body._buffer);
 		dest.end();
