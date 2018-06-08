@@ -49,7 +49,7 @@ class RequestImpl {
     }
 
     const abortController = AbortController.createImpl([]);
-    if (signal !== null) {
+    if (signal) {
       if (signal.aborted) {
         abortController.abort();
       } else {
@@ -127,16 +127,6 @@ class RequestImpl {
 
   // PRIVATE METHODS
   // ---------------
-
-  /**
-   * Get the AbortSignal object belonging to a Request.
-   *
-   * @param   Request      A Request instance
-   * @return  AbortSignal  request's signal
-   */
-  static getAbortSignal(request) {
-    return request[INTERNALS].signal;
-  }
 
   /**
    * Convert a Request to Node.js http request options.

@@ -28,7 +28,7 @@ class BodyImpl {
   blob() {
     let ct = (this.headers && this.headers.get("content-type")) || "";
     return this.consumeBody().then(buf =>
-      Blob.createImpl([[buf], { type: ct.toLowerCase() }])
+      Blob.create([[buf], { type: ct.toLowerCase() }])
     );
   }
 
@@ -180,7 +180,7 @@ class BodyImpl {
           return;
         }
 
-        clearTimeout(resTimeout);
+        // clearTimeout(resTimeout);
 
         try {
           resolve(Buffer.concat(accum));

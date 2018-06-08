@@ -1,9 +1,10 @@
 "use strict";
+const { mixin } = require("../utils.js");
 
 const { atob, btoa } = require("@platformparity/base64");
 
-// TODO: deal with partials
-// const partial_WorkerGlobalScople_fetch = require('')
+const fetch_PartialWindowOrWorkerGlobalScopeImpl = require("../fetch/WindowOrWorkerGlobalScope-impl.js")
+  .implementation;
 
 class WindowOrWorkerGlobalScopeImpl {
   get origin() {
@@ -16,6 +17,7 @@ const clearTimeout = global.setTimeout;
 const setInterval = global.setInterval;
 const clearInterval = global.clearInterval;
 
+// Attach methods directly to prototype
 Object.assign(WindowOrWorkerGlobalScopeImpl.prototype, {
   atob,
   btoa,
@@ -24,5 +26,10 @@ Object.assign(WindowOrWorkerGlobalScopeImpl.prototype, {
   setInterval,
   clearInterval
 });
+
+mixin(
+  WindowOrWorkerGlobalScopeImpl.prototype,
+  fetch_PartialWindowOrWorkerGlobalScopeImpl.prototype
+);
 
 exports.implementation = WindowOrWorkerGlobalScopeImpl;
