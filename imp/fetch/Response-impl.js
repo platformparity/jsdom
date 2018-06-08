@@ -1,6 +1,6 @@
 "use strict";
 const { mixin } = require("../utils.js");
-const { implementation: BodyImpl, clone } = require("./BodyImpl-impl.js");
+const { implementation: BodyImpl, clone } = require("./Body-impl.js");
 
 const Headers = require("../../lib/Headers.js");
 const Response = require("../../lib/Response.js");
@@ -15,10 +15,10 @@ class ResponseImpl {
 
     const [body, init] = args;
 
-		const status = init.status
+		const status = init.status || 200;
 
 		this[INTERNALS] = {
-			url: init.url,
+			url: init.url || '',
 			status,
 			statusText: init.statusText || STATUS_CODES[status],
 			headers: Headers.createImpl([init.headers]),
@@ -46,7 +46,7 @@ class ResponseImpl {
 	}
 
 	clone() {
-		const res = Response.createImpl([clone(this), {
+		const res = Response.createImpl([this.cloneBody(), {
 			status: this.status,
 			statusText: this.statusText,
 			headers: this.headers,
