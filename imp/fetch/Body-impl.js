@@ -9,6 +9,45 @@ const convert = require("encoding").convert;
 const INTERNALS = Symbol("Body internals");
 
 class BodyImpl {
+  get body() {
+    // TODO: ensure that it is of type readablestream...
+    return this[INTERNALS].body;
+  }
+
+  get bodyUsed() {
+    return this[INTERNALS].disturbed;
+  }
+
+  arrayBuffer() {
+    return this.consumeBody().then(buf =>
+      buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength)
+    );
+  }
+
+  blob() {
+    let ct = (this.headers && this.headers.get("content-type")) || "";
+    return this.consumeBody().then(buf =>
+      Blob.createImpl([[buf], { type: ct.toLowerCase() }])
+    );
+  }
+
+  formData() {
+    throw new Error("not implemented");
+  }
+
+  json() {
+    return this.consumeBody().then(buffer => {
+      return JSON.parse(buffer.toString());
+    });
+  }
+
+  text() {
+    return this.consumeBody().then(buffer => buffer.toString());
+  }
+
+  // PRIVATE METHODS
+  // ---------------
+
   bodyConstructor([body]) {
     // TODO: necessary?
     if (
@@ -59,45 +98,6 @@ class BodyImpl {
       });
     }
   }
-
-  get body() {
-    // TODO: ensure that it is of type readablestream...
-    return this[INTERNALS].body;
-  }
-
-  get bodyUsed() {
-    return this[INTERNALS].disturbed;
-  }
-
-  arrayBuffer() {
-    return this.consumeBody().then(buf =>
-      buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength)
-    );
-  }
-
-  blob() {
-    let ct = (this.headers && this.headers.get("content-type")) || "";
-    return this.consumeBody().then(buf =>
-      Blob.createImpl([[buf], { type: ct.toLowerCase() }])
-    );
-  }
-
-  formData() {
-    throw new Error("not implemented");
-  }
-
-  json() {
-    return this.consumeBody().then(buffer => {
-      return JSON.parse(buffer.toString());
-    });
-  }
-
-  text() {
-    return this.consumeBody().then(buffer => buffer.toString());
-  }
-
-  // PRIVATE METHODS
-  // ---------------
 
   /**
    * Consume and convert an entire Body to a Buffer.
