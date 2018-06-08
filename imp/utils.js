@@ -1,8 +1,8 @@
 "use strict";
 const path = require("path");
 const { serializeURL, parseURL } = require("whatwg-url");
-const { domSymbolTree } = require("./helpers/internal-constants.js");
-const { parseURLToResultingURLRecord } = require("./helpers/document-base-url.js");
+// const { domSymbolTree } = require("./helpers/internal-constants.js");
+// const { parseURLToResultingURLRecord } = require("./helpers/document-base-url.js");
 
 exports.toFileUrl = function (fileName) {
   // Beyond just the `path.resolve`, this is mostly for the benefit of Windows,
@@ -125,6 +125,7 @@ exports.memoizeQuery = function memoizeQuery(fn) {
   };
 };
 
+/*
 exports.reflectURLAttribute = (elementImpl, contentAttributeName) => {
   const attributeValue = elementImpl.getAttribute(contentAttributeName);
   if (attributeValue === null || attributeValue === "") {
@@ -137,6 +138,7 @@ exports.reflectURLAttribute = (elementImpl, contentAttributeName) => {
   }
   return serializeURL(urlRecord);
 };
+*/
 
 function isValidAbsoluteURL(str) {
   return parseURL(str) !== null;
