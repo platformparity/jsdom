@@ -16,7 +16,7 @@ class BodyImpl {
         body == null ||
         typeof body === "string" ||
         isURLSearchParams(body) ||
-        body instanceof Blob || // FIXME: doesn't work
+        Blob.isImpl(body) ||
         Buffer.isBuffer(body) ||
         body instanceof ArrayBuffer ||
         ArrayBuffer.isView(body) ||
@@ -61,6 +61,7 @@ class BodyImpl {
   }
 
   get body() {
+    // TODO: ensure that it is of type readablestream...
     return this[INTERNALS].body;
   }
 
@@ -124,8 +125,7 @@ class BodyImpl {
     }
 
     // body is blob
-    if (this.body instanceof Blob) {
-      //  FIXME: this doesn't work
+    if (Blob.isImpl(this.body)) {
       return Promise.resolve(this.body._buffer);
     }
 
@@ -259,11 +259,10 @@ class BodyImpl {
    * @return  Mixed
    */
   cloneBody() {
-    let p1, p2;
-    let body = this.body;
+    const { body, bodyUsed } = this;
 
     // don't allow cloning a used body
-    if (this.bodyUsed) {
+    if (bodyUsed) {
       throw new Error("cannot clone body after it is used");
     }
 
@@ -271,13 +270,13 @@ class BodyImpl {
     // FIXME: we can't clone the form-data object without having it as a dependency
     if (body instanceof Stream && typeof body.getBoundary !== "function") {
       // tee instance body
-      p1 = new PassThrough();
-      p2 = new PassThrough();
+      const p1 = new PassThrough();
+      const p2 = new PassThrough();
       body.pipe(p1);
       body.pipe(p2);
       // set instance body to teed body and return the other teed body
       this[INTERNALS].body = p1;
-      body = p2;
+      return p2;
     }
 
     return body;
@@ -304,8 +303,7 @@ class BodyImpl {
     } else if (isURLSearchParams(body)) {
       // body is a URLSearchParams
       return "application/x-www-form-urlencoded;charset=UTF-8";
-    } else if (body instanceof Blob) {
-      // FIXME: this doesn't work
+    } else if (Blob.isImpl(body)) {
       // body is blob
       return body.type || null;
     } else if (Buffer.isBuffer(body)) {
@@ -348,8 +346,7 @@ class BodyImpl {
     } else if (isURLSearchParams(body)) {
       // body is URLSearchParams
       return Buffer.byteLength(String(body));
-    } else if (body instanceof Blob) {
-      // FIXME: This doesn't work
+    } else if (Blob.isImpl(body)) {
       // body is blob
       return body.size;
     } else if (Buffer.isBuffer(body)) {
@@ -395,8 +392,7 @@ class BodyImpl {
       // body is URLSearchParams
       dest.write(Buffer.from(String(body)));
       dest.end();
-    } else if (body instanceof Blob) {
-      // FIXME: This doens't work
+    } else if (Blob.isImpl(body)) {
       // body is blob
       dest.write(body._buffer);
       dest.end();
@@ -427,7 +423,7 @@ class BodyImpl {
  * @return  String
  */
 function isURLSearchParams(obj) {
-  // FIXME: replace `instanceof` !?
+  // FIXME: replace with `instanceof` !?
   // Duck-typing as a necessary condition.
   if (
     typeof obj !== "object" ||

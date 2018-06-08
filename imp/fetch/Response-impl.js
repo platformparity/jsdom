@@ -1,6 +1,7 @@
 "use strict";
 const { mixin } = require("../utils.js");
-const { implementation: BodyImpl, clone } = require("./Body-impl.js");
+
+const BodyImpl = require("./Body-impl.js").implementation;
 
 const Headers = require("../../lib/Headers.js");
 const Response = require("../../lib/Response.js");
