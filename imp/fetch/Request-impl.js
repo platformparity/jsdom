@@ -9,13 +9,13 @@ const Request = require("../../lib/Request.js");
 
 const AbortController = require("../../lib/AbortController.js");
 
-const { format: format_url, parse: parse_url } = require("url");
+const { format: formatURL, parse: parseURL } = require("url");
 
 const INTERNALS = Symbol("Request internals");
 
 class RequestImpl {
-  constructor([input, init]) {
-    const parsedURL = parse_url(input.url);
+  constructor([input, init = {}]) {
+    const parsedURL = parseURL(input.url || input);
 
     const signal =
       init.signal || (input[INTERNALS] && input[INTERNALS].signal) || null;
@@ -49,7 +49,7 @@ class RequestImpl {
     }
 
     const abortController = AbortController.createImpl([]);
-    if (signal !== undefined) {
+    if (signal !== null) {
       if (signal.aborted) {
         abortController.abort();
       } else {
@@ -93,7 +93,7 @@ class RequestImpl {
   }
 
   get url() {
-    return format_url(this[INTERNALS].parsedURL);
+    return formatURL(this[INTERNALS].parsedURL);
   }
 
   get headers() {
