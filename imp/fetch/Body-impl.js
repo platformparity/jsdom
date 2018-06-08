@@ -96,6 +96,9 @@ class BodyImpl {
     return this.consumeBody().then(buffer => buffer.toString());
   }
 
+  // PRIVATE METHODS
+  // ---------------
+
   /**
    * Consume and convert an entire Body to a Buffer.
    *

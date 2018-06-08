@@ -125,6 +125,9 @@ class HeadersImpl {
     }
   }
 
+  // PRIVATE METHODS
+  // ---------------
+
   /**
    * Export the Headers object in a form that Node.js can consume.
    *

@@ -2,6 +2,7 @@
 
 class AbortControllerImpl {
   constructor(args, privateData) {
+    // TODO: is this necessary?
     this.signal = privateData.AbortSignal.createImpl([]);
   }
 

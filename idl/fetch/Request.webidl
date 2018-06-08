@@ -21,8 +21,6 @@ interface Request {
   readonly attribute AbortSignal signal;
 
   [NewObject] Request clone();
-
-  Promise<Response> test();
 };
 Request includes Body;
 
