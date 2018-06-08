@@ -21,11 +21,11 @@ addDir("events");
 addDir("file");
 addDir("form-data");
 addDir("fetch");
+addDir("worker");
 
-const outputDir = resolve( "./lib");
+const outputDir = resolve("./lib");
 
-transformer.generate(outputDir)
-  .catch(err => {
-    console.error(err);
-    process.exit(1);
-  });
+transformer.generate(outputDir).catch(err => {
+  console.error(err);
+  process.exit(1);
+});

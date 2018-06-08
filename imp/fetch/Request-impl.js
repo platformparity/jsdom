@@ -7,9 +7,7 @@ const BodyImpl = require("./Body-impl.js").implementation;
 const Headers = require("../../lib/Headers.js");
 const Request = require("../../lib/Request.js");
 
-// TODO: This doesn't work. need to call `createInterface` first
-// const AbortController = require("../../lib/AbortController.js");
-// const AbortSignal = require("../../lib/AbortSignal.js");
+const AbortController = require("../../lib/AbortController.js");
 
 const { format: format_url, parse: parse_url } = require("url");
 
@@ -19,8 +17,8 @@ class RequestImpl {
   constructor([input, init]) {
     const parsedURL = parse_url(input.url);
 
-    // const signal =
-    //   init.signal || (input[INTERNALS] && input[INTERNALS].signal) || null;
+    const signal =
+      init.signal || (input[INTERNALS] && input[INTERNALS].signal) || null;
 
     const method = (init.method || input.method || "GET").toUpperCase();
 
@@ -50,23 +48,21 @@ class RequestImpl {
       }
     }
 
-    // const abortController = AbortController.createImpl([]);
-    // if (signal !== undefined) {
-    //   if (signal.aborted) {
-    //     abortController.abort();
-    //   } else {
-    //     signal.addEventListener("abort", () => {
-    //       abortController.abort();
-    //     });
-    //   }
-    // }
+    const abortController = AbortController.createImpl([]);
+    if (signal !== undefined) {
+      if (signal.aborted) {
+        abortController.abort();
+      } else {
+        signal.addEventListener("abort", () => abortController.abort());
+      }
+    }
 
     this[INTERNALS] = {
       method,
       redirect: init.redirect || input.redirect || "follow",
       headers,
-      parsedURL
-      // signal: abortController.signal
+      parsedURL,
+      signal: abortController.signal
     };
 
     // node-fetch-only options
@@ -121,9 +117,9 @@ class RequestImpl {
   // get isReloadNavigation() {}
   // get isHistoryNavigation() {}
 
-  // get signal() {
-  //   return this[INTERNALS].signal;
-  // }
+  get signal() {
+    return this[INTERNALS].signal;
+  }
 
   clone() {
     return Request.createImpl([this]);

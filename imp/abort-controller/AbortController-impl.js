@@ -1,9 +1,10 @@
 "use strict";
 
+const AbortSignal = require("../../lib/AbortSignal.js");
+
 class AbortControllerImpl {
-  constructor(args, privateData) {
-    // TODO: is this necessary?
-    this.signal = privateData.AbortSignal.createImpl([]);
+  constructor() {
+    this.signal = AbortSignal.createImpl([]);
   }
 
   abort() {

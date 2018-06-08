@@ -1,16 +1,16 @@
 "use strict";
 
-const { setupForSimpleEventAccessors } = require("../helpers/create-event-accessor.js");
-const EventTargetImpl = require("../event-target/EventTarget-impl.js").implementation;
+const {
+  setupForSimpleEventAccessors
+} = require("../helpers/create-event-accessor.js");
+const EventTargetImpl = require("../event-target/EventTarget-impl.js")
+  .implementation;
 
 const Event = require("../../lib/Event.js");
 
 class AbortSignalImpl extends EventTargetImpl {
-  constructor(args, privateData) {
+  constructor(args) {
     super();
-
-    // make event firing possible
-    // this._ownerDocument = privateData.window.document;
 
     this.aborted = false;
     this.abortAlgorithms = new Set();
@@ -27,13 +27,11 @@ class AbortSignalImpl extends EventTargetImpl {
     }
     this.abortAlgorithms.clear();
 
-    this._dispatch(Event.createImpl(
-      [
-        "abort",
-        { bubbles: false, cancelable: false }
-      ],
-      { isTrusted: true }
-    ));
+    this._dispatch(
+      Event.createImpl(["abort", { bubbles: false, cancelable: false }], {
+        isTrusted: true
+      })
+    );
   }
 
   _addAlgorithm(algorithm) {
