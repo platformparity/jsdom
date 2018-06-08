@@ -1,3 +1,4 @@
+"use strict";
 const Blob = require("../../lib/Blob.js");
 const FormData = require("../../lib/FormData.js");
 

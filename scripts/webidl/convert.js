@@ -21,7 +21,7 @@ addDir("events");
 addDir("file");
 addDir("form-data");
 addDir("fetch");
-addDir("worker");
+addDir("global");
 
 const outputDir = resolve("./lib");
 
