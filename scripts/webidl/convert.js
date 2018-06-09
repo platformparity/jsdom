@@ -21,6 +21,7 @@ addDir("events");
 addDir("file");
 addDir("form-data");
 addDir("fetch");
+addDir("navigator");
 addDir("global");
 
 const outputDir = resolve("./lib");

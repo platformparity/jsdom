@@ -1,3 +1,5 @@
+"use strict";
+
 const { cpus } = require("os");
 
 class NavigatorConcurrentHardwareImpl {

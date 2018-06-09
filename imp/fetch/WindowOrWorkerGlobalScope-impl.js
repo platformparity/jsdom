@@ -1,6 +1,6 @@
 "use strict";
 
-const idlUtils = require("../../lib/utils.js");
+// const idlUtils = require("../../lib/utils.js");
 
 const Headers = require("../../lib/Headers.js");
 const Request = require("../../lib/Request.js");

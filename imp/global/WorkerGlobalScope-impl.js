@@ -5,6 +5,9 @@ const { mixin } = require("../utils.js");
 
 const { DOMException } = require("@platformparity/dom-exception");
 
+const WorkerLocation = require("../../lib/WorkerLocation.js");
+const WorkerNavigator = require("../../lib/WorkerNavigator.js");
+
 const EventTargetImpl = require("../event-target/EventTarget-impl.js")
   .implementation;
 const WindowOrWorkerGlobalScopeImpl = require("./WindowOrWorkerGlobalScope-impl.js")
@@ -14,7 +17,7 @@ const {
   setupForSimpleEventAccessors
 } = require("../helpers/create-event-accessor.js");
 
-// Forshadowing of some shady shit that's going down later...
+// Foreshadowing of some shady shit that's going down later...
 const nodeRequire = global.require;
 
 const events = [
@@ -26,17 +29,22 @@ const events = [
   "unhandledrejection"
 ];
 
+// TODO: do this in constructor? There isn't really a point in
+// having more than one of these around tho, is there?
+const location = WorkerLocation.create();
+const navigator = WorkerNavigator.create();
+
 class WorkerGlobalScopeImpl extends EventTargetImpl {
   get self() {
     return this;
   }
 
   get location() {
-    throw Error("not implemented");
+    return location;
   }
 
   get navigator() {
-    throw Error("not implemented");
+    return navigator;
   }
 
   importScripts(...urls) {

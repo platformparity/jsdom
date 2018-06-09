@@ -15,6 +15,7 @@
     "@platformparity/base64": "^1.0.0-wip.0",
     "@platformparity/dom-exception": "^1.0.0-wip.5",
     "encoding": "^0.1.12",
+    "os-locale": "^2.1.0",
     "webidl-conversions": "^4.0.2",
     "whatwg-encoding": "^1.0.3",
     "whatwg-mimetype": "^2.1.0",
