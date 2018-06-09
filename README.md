@@ -1,0 +1,145 @@
+# Platform Parity
+
+TODO WIP WIP
+
+## Status
+
+Below is a print-out of everything that's available in a `Worker` in Chrome (67). The goal of the platform parity project is to provide a reasonable implementation to all of these in node. Plenty won't have a reasonable implementation though. These should either be undefined or throw upon invocation (not sure which is better).
+
+### `WorkerGlobalContext` and friends
+
+- [ ] `ByteLengthQueuingStrategy`
+- [ ] `CountQueuingStrategy`
+- [ ] `ReadableStream`
+- [ ] `WritableStream`
+- [ ] `TransformStream`
+- [ ] `PushSubscriptionOptions`
+- [ ] `PushSubscription`
+- [ ] `PushManager`
+- [ ] `PermissionStatus`
+- [ ] `Permissions`
+- [ ] `Notification`
+- [ ] `BudgetService`
+- [ ] `PerformanceServerTiming`
+- [ ] `DOMRectReadOnly`
+- [ ] `DOMRect`
+- [ ] `DOMQuad`
+- [ ] `DOMPointReadOnly`
+- [ ] `DOMPoint`
+- [ ] `DOMMatrixReadOnly`
+- [ ] `DOMMatrix`
+- [ ] `WebSocket`
+- [x] `TextEncoder`
+- [x] `TextDecoder`
+- [ ] `SyncManager`
+- [x] `SubtleCrypto`
+- [ ] ~~`ServiceWorkerRegistration`~~
+- [ ] `NetworkInformation`
+- [ ] `IDBVersionChangeEvent`
+- [ ] `IDBTransaction`
+- [ ] `IDBRequest`
+- [ ] `IDBOpenDBRequest`
+- [ ] `IDBObjectStore`
+- [ ] `IDBKeyRange`
+- [ ] `IDBIndex`
+- [ ] `IDBFactory`
+- [ ] `IDBDatabase`
+- [ ] `IDBCursorWithValue`
+- [ ] `IDBCursor`
+- [ ] `EventSource`
+- [x] `CryptoKey`
+- [x] `Crypto`
+- [ ] `CloseEvent`
+- [ ] `BroadcastChannel`
+- [ ] ~~`XMLHttpRequestUpload`~~
+- [ ] ~~`XMLHttpRequestEventTarget`~~
+- [ ] ~~`XMLHttpRequest`~~
+- [x] `WorkerNavigator`
+- [x] `WorkerLocation`
+- [x] `WorkerGlobalScope`
+- [x] `URLSearchParams`
+- [x] `URL`
+- [x] `Response`
+- [x] `Request`
+- [ ] `PromiseRejectionEvent`
+- [x] `ProgressEvent`
+- [ ] `PerformanceResourceTiming`
+- [ ] `PerformanceObserverEntryList`
+- [ ] `PerformanceObserver`
+- [ ] `PerformanceEntry`
+- [ ] `MessagePort`
+- [x] `MessageEvent`
+- [ ] `MessageChannel`
+- [ ] `ImageData`
+- [ ] `ImageBitmap`
+- [x] `Headers`
+- [x] `FormData`
+- [ ] ~~`FileReaderSync`~~
+- [x] `FileReader`
+- [x] `FileList`
+- [x] `File`
+- [x] `EventTarget`
+- [x] `Event`
+- [ ] `DedicatedWorkerGlobalScope`
+- [ ] `DOMStringList`
+- [x] `DOMException`
+- [x] `CustomEvent`
+- [x] `Blob`
+- [x] `AbortSignal`
+- [x] `AbortController`
+- [ ] `onmessage`
+- [ ] `onmessageerror`
+- [ ] `postMessage`
+- [ ] `close`
+- [ ] ~~`webkitRequestFileSystem`~~
+- [ ] ~~`webkitRequestFileSystemSync`~~
+- [ ] ~~`webkitResolveLocalFileSystemURL`~~
+- [ ] ~~`webkitResolveLocalFileSystemSyncURL`~~
+- [x] `BigInt`
+- [x] `WebAssembly`
+- [ ] `Cache`
+- [ ] `CacheStorage`
+- [ ] `NavigationPreloadManager`
+- [ ] `StorageManager`
+- [ ] `TEMPORARY`
+- [ ] `PERSISTENT`
+- [x] `self`
+- [x] `location`
+- [x] `onerror` (never fired)
+- [x] `navigator`
+- [x] `onrejectionhandled` (never fired)
+- [x] `onunhandledrejection`(never fired)
+- [ ] `isSecureContext`
+- [x] `origin`
+- [ ] `performance`
+- [x] `importScripts`
+- [x] `fetch`
+- [x] `btoa`
+- [x] `atob`
+- [x] `setTimeout`
+- [x] `clearTimeout`
+- [x] `setInterval`
+- [x] `clearInterval`
+- [ ] `createImageBitmap`
+- [x] `crypto`
+- [ ] `indexedDB`
+- [ ] `caches`
+- [x] `addEventListener`
+- [x] `removeEventListener`
+- [x] `dispatchEvent`
+
+### `Navigator`
+
+- [x] `hardwareConcurrency`
+- [x] `appCodeName`
+- [x] `appName`
+- [x] `appVersion`
+- [x] `platform`
+- [x] `product`
+- [x] `userAgent`
+- [x] `onLine`
+- [ ] `connection`
+- [ ] `budget`
+- [ ] `permissions`
+- [ ] `deviceMemory`
+- [ ] `storage`
