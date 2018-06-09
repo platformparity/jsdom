@@ -15,16 +15,6 @@ const { resolve: resolveURL } = require("url");
 const zlib = require("zlib");
 
 class PartialWindowOrWorkerGlobalScopeImpl {
-  isRedirect(code) {
-    return (
-      code === 301 ||
-      code === 302 ||
-      code === 303 ||
-      code === 307 ||
-      code === 308
-    );
-  }
-
   fetch(input, init) {
     // wrap http.request into fetch
     return new Promise((resolve, reject) => {
@@ -103,7 +93,7 @@ class PartialWindowOrWorkerGlobalScopeImpl {
         const headers = HeadersImpl.createHeadersLenient(res.headers);
 
         // HTTP fetch step 5
-        if (this.isRedirect(res.statusCode)) {
+        if (this.constructor.isRedirect(res.statusCode)) {
           // HTTP fetch step 5.2
           const location = headers.get("Location");
 
@@ -266,6 +256,19 @@ class PartialWindowOrWorkerGlobalScopeImpl {
 
       request.writeToStream(req);
     });
+  }
+
+  // PRIVATE METHODS
+  // ---------------
+
+  static isRedirect(code) {
+    return (
+      code === 301 ||
+      code === 302 ||
+      code === 303 ||
+      code === 307 ||
+      code === 308
+    );
   }
 }
 

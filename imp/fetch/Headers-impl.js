@@ -4,24 +4,6 @@ const Headers = require("../../lib/Headers.js");
 const invalidTokenRegex = /[^\^_`a-zA-Z\-0-9!#$%&'*+.|~]/;
 const invalidHeaderCharRegex = /[^\t\x20-\x7e\x80-\xff]/;
 
-/**
- * Find the key in the map object given a header name.
- *
- * Returns undefined if not found.
- *
- * @param   String  name  Header name
- * @return  String|Undefined
- */
-function find(map, name) {
-  name = name.toLowerCase();
-  for (const key in map) {
-    if (key.toLowerCase() === name) {
-      return key;
-    }
-  }
-  return undefined;
-}
-
 const MAP = Symbol("map");
 
 class HeadersImpl {
@@ -59,7 +41,7 @@ class HeadersImpl {
    * @return  Mixed
    */
   get(name) {
-    const key = find(this[MAP], name);
+    const key = this.constructor.find(this[MAP], name);
     if (key === undefined) {
       return null;
     }
@@ -75,7 +57,7 @@ class HeadersImpl {
    * @return  Void
    */
   set(name, value) {
-    const key = find(this[MAP], name);
+    const key = this.constructor.find(this[MAP], name);
     this[MAP][key !== undefined ? key : name] = [value];
   }
 
@@ -87,7 +69,7 @@ class HeadersImpl {
    * @return  Void
    */
   append(name, value) {
-    const key = find(this[MAP], name);
+    const key = this.constructor.find(this[MAP], name);
     if (key !== undefined) {
       this[MAP][key].push(value);
     } else {
@@ -102,7 +84,7 @@ class HeadersImpl {
    * @return  Boolean
    */
   has(name) {
-    return find(this[MAP], name) !== undefined;
+    return this.constructor.find(this[MAP], name) !== undefined;
   }
 
   /**
@@ -112,7 +94,7 @@ class HeadersImpl {
    * @return  Void
    */
   delete(name) {
-    const key = find(this[MAP], name);
+    const key = this.constructor.find(this[MAP], name);
     if (key !== undefined) {
       delete this[MAP][key];
     }
@@ -129,6 +111,24 @@ class HeadersImpl {
   // ---------------
 
   /**
+   * Find the key in the map object given a header name.
+   *
+   * Returns undefined if not found.
+   *
+   * @param   String  name  Header name
+   * @return  String|Undefined
+   */
+  static find(map, name) {
+    name = name.toLowerCase();
+    for (const key in map) {
+      if (key.toLowerCase() === name) {
+        return key;
+      }
+    }
+    return undefined;
+  }
+
+  /**
    * Export the Headers object in a form that Node.js can consume.
    *
    * @return  Object
@@ -138,7 +138,7 @@ class HeadersImpl {
 
     // http.request() only supports string as Host header. This hack makes
     // specifying custom Host header possible.
-    const hostHeaderKey = find(this[MAP], "Host");
+    const hostHeaderKey = this.constructor.find(this[MAP], "Host");
     if (hostHeaderKey !== undefined) {
       obj[hostHeaderKey] = obj[hostHeaderKey][0];
     }
