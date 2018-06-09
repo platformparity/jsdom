@@ -20,6 +20,7 @@ addDir("event-target");
 addDir("events");
 addDir("file");
 addDir("form-data");
+addDir("fetch");
 
 const outputDir = resolve( "./lib");
 
