@@ -49,7 +49,7 @@ class BodyImpl {
   // PRIVATE METHODS
   // ---------------
 
-  bodyConstructor([body]) {
+  bodyConstructor([body, { nodeTimeout = 0, nodeMaxChunkSize = 0 } = {}]) {
     // TODO: necessary?
     if (
       !(
@@ -74,6 +74,9 @@ class BodyImpl {
       error: null,
       rejectCurrentPromise: undefined
     };
+
+    this.nodeMaxChunkSize = size;
+    this.nodeTimeout = timeout;
 
     if (body instanceof Stream) {
       // handle stream error, such as incorrect content-encoding
@@ -155,6 +158,23 @@ class BodyImpl {
     let abort = false;
 
     return new Promise((resolve, reject) => {
+      let resTimeout;
+
+      // allow timeout on slow response body
+      if (this.nodeTimeout) {
+        resTimeout = setTimeout(() => {
+          abort = true;
+          reject(
+            new Error(
+              `Response timeout while trying to fetch ${this.url} (over ${
+                this.nodeTimeout
+              }ms)`,
+              "body-timeout"
+            )
+          );
+        }, this.nodeTimeout);
+      }
+
       this[INTERNALS].rejectCurrentPromise = reject;
 
       this.body.on("data", chunk => {
@@ -162,14 +182,21 @@ class BodyImpl {
           return;
         }
 
-        /*
-        // TODO: what is this? implement highwatermark !?
-  			if (this.size && accumBytes + chunk.length > this.size) {
-  				abort = true;
-  				reject(new Error(`content size at ${this.url} over limit: ${this.size}`, 'max-size'));
-  				return;
-  			}
-        */
+        if (
+          this.nodeMaxChunkSize &&
+          accumBytes + chunk.length > this.nodeMaxChunkSize
+        ) {
+          abort = true;
+          reject(
+            new Error(
+              `content size at ${this.url} over limit: ${
+                this.nodeMaxChunkSize
+              }`,
+              "max-size"
+            )
+          );
+          return;
+        }
 
         accumBytes += chunk.length;
         accum.push(chunk);
@@ -180,7 +207,7 @@ class BodyImpl {
           return;
         }
 
-        // clearTimeout(resTimeout);
+        clearTimeout(resTimeout);
 
         try {
           resolve(Buffer.concat(accum));

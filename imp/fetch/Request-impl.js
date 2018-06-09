@@ -37,7 +37,13 @@ class RequestImpl {
           ? input.cloneBody()
           : null;
 
-    this.bodyConstructor([inputBody]);
+    this.bodyConstructor([
+      inputBody,
+      {
+        nodeTimeout: init.nodeTimeout || input.nodeTimeout || 0,
+        nodeMaxChunkSize: init.nodeMaxChunkSize || input.nodeMaxChunkSize || 0
+      }
+    ]);
 
     const headers = Headers.createImpl([init.headers || input.headers || {}]);
 

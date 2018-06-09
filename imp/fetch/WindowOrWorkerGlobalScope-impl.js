@@ -36,7 +36,7 @@ class PartialWindowOrWorkerGlobalScopeImpl {
 
       // send request
       const req = send(options);
-      // let reqTimeout;
+      let reqTimeout;
       let body;
 
       function abortCallback() {
@@ -54,11 +54,10 @@ class PartialWindowOrWorkerGlobalScopeImpl {
 
       function finalize() {
         req.abort();
-        // clearTimeout(reqTimeout);
+        clearTimeout(reqTimeout);
         signal.removeEventListener("abort", abortCallback);
       }
 
-      /*
       if (request.timeout) {
         req.once("socket", socket => {
           reqTimeout = setTimeout(() => {
@@ -69,7 +68,6 @@ class PartialWindowOrWorkerGlobalScopeImpl {
           }, request.timeout);
         });
       }
-      */
 
       function errorHandler(err) {
         reject(
@@ -88,7 +86,7 @@ class PartialWindowOrWorkerGlobalScopeImpl {
       req.on("error", errorHandler);
 
       req.once("response", res => {
-        // clearTimeout(reqTimeout);
+        clearTimeout(reqTimeout);
 
         const headers = HeadersImpl.createHeadersLenient(res.headers);
 
