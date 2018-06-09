@@ -1,4 +1,5 @@
-[Constructor(optional BodyInit? body = null, optional ResponseInit init), Exposed=(Window,Worker)]
+[Constructor(optional BodyInit? body = null, optional ResponseInit init),
+ Exposed=(Window,Worker)]
 interface Response {
   [NewObject] static Response error();
   [NewObject] static Response redirect(USVString url, optional unsigned short status = 302);
