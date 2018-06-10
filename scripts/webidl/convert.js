@@ -8,7 +8,8 @@ const Webidl2js = require("webidl2js");
 
 const transformer = new Webidl2js({
   implSuffix: "-impl",
-  suppressErrors: true
+  suppressErrors: true,
+  urlTypes: true,
 });
 
 function addDir(dir) {
