@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "prettier": "^1.13.4",
-    "webidl2js": "platformparity/webidl2js#6506958"
+    "webidl2js": "platformparity/webidl2js#d8bdede"
   },
   "scripts": {
     "test": "echo \"Warn: no test specified\" && exit 0",
