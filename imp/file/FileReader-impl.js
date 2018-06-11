@@ -4,7 +4,7 @@ const { Buffer } = require("buffer");
 const whatwgEncoding = require("whatwg-encoding");
 const MIMEType = require("whatwg-mimetype");
 const querystring = require("querystring");
-const { DOMException } = require("@platformparity/dom-exception");
+const DOMException = require("domexception");
 const EventTargetImpl = require("../event-target/EventTarget-impl.js")
   .implementation;
 const ProgressEvent = require("../../lib/ProgressEvent.js");

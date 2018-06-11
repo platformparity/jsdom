@@ -1,5 +1,5 @@
 "use strict";
-const { DOMException } = require("@platformparity/dom-exception");
+const DOMException = require("domexception");
 const reportException = require("../helpers/runtime-script-errors.js");
 const idlUtils = require("../../lib/utils.js");
 

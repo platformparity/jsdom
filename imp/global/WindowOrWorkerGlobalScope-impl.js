@@ -1,7 +1,7 @@
 "use strict";
 const { mixin } = require("../utils.js");
 
-const { atob, btoa } = require("@platformparity/base64");
+const { atob, btoa } = require("abab");
 
 // FIXME: naming of partial interface mixins..
 const fetch_PartialWindowOrWorkerGlobalScopeImpl = require("../fetch/WindowOrWorkerGlobalScope-impl.js")
@@ -9,8 +9,29 @@ const fetch_PartialWindowOrWorkerGlobalScopeImpl = require("../fetch/WindowOrWor
 
 class WindowOrWorkerGlobalScopeImpl {
   get origin() {
-    // TODO: is this right?
     return this.location.origin;
+  }
+
+  atob(data) {
+    const result = atob(data);
+    if (result === null) {
+      throw new DOMException(
+        "The string to be decoded contains invalid characters.",
+        "InvalidCharacterError"
+      );
+    }
+    return result;
+  }
+
+  btoa(data) {
+    const result = btoa(data);
+    if (result === null) {
+      throw new DOMException(
+        "The string to be encoded contains invalid characters.",
+        "InvalidCharacterError"
+      );
+    }
+    return result;
   }
 }
 
@@ -18,8 +39,6 @@ const { setTimeout, clearTimeout, setInterval, clearInterval } = global;
 
 // Attach methods directly to prototype
 Object.assign(WindowOrWorkerGlobalScopeImpl.prototype, {
-  atob,
-  btoa,
   setTimeout,
   clearTimeout,
   setInterval,

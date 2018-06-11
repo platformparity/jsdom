@@ -22,10 +22,10 @@ function evilMixin(target, source) {
 
 // Use the first `toStrinTag` from `globalContext` instead:
 delete global[Symbol.toStringTag];
-// Will not be overwritten by our own `crypto` key otherwise:
-delete global.crypto;
-// to teh ting:
+
 evilMixin(global, globalContext);
+
+global.crypto = globalContext.crypto;
 
 Object.setPrototypeOf(
   global,

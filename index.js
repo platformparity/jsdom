@@ -33,5 +33,10 @@ function bindFunctions(obj) {
 module.exports = bindFunctions(globalContext);
 
 // Patching a bunch of things manually..
-module.exports.DOMException = require("@platformparity/dom-exception").DOMException;
-Object.assign(module.exports, require("@platformparity/web-cryptography"));
+module.exports.DOMException = require("domexception");
+Object.assign(module.exports, require('text-encoding'));
+
+module.exports.Crypto = require("@trust/webcrypto/src/Crypto.js");
+module.exports.SubtleCrypto = require("@trust/webcrypto/src/SubtleCrypto.js");
+module.exports.CryptoKey = require("@trust/webcrypto/src/keys/CryptoKey.js");
+module.exports.crypto = new module.exports.Crypto();

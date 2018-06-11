@@ -3,7 +3,7 @@
 const idlUtils = require("../../lib/utils.js");
 const { mixin } = require("../utils.js");
 
-const { DOMException } = require("@platformparity/dom-exception");
+const DOMException = require("domexception");
 
 const WorkerLocation = require("../../lib/WorkerLocation.js");
 const WorkerNavigator = require("../../lib/WorkerNavigator.js");
