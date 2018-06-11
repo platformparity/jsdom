@@ -32,5 +32,8 @@
     "build": "mkdir -p lib && node ./scripts/webidl/convert",
     "preversion": "npm run format && git add .",
     "prepublishOnly": "npm run build"
+  },
+  "prettier": {
+    "printWidth": 80
   }
 }

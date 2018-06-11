@@ -1,2 +1,1 @@
-# tests require lf line endings
 *.js text eol=lf
