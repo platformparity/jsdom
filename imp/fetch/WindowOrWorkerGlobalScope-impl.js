@@ -91,7 +91,7 @@ class PartialWindowOrWorkerGlobalScopeImpl {
         const headers = HeadersImpl.createHeadersLenient(res.headers);
 
         // HTTP fetch step 5
-        if (this.constructor.isRedirect(res.statusCode)) {
+        if (PartialWindowOrWorkerGlobalScopeImpl.isRedirect(res.statusCode)) {
           // HTTP fetch step 5.2
           const location = headers.get("Location");
 

@@ -1,25 +1,36 @@
 require("./evil.js");
 
-delete global.Buffer;
-delete global.__dirname;
-delete global.__filename;
+// TODO: go the opposite route and delete everything that's not whitelisted?
+
+// modules
+delete global.require;
 delete global.exports;
 delete global.module;
-delete global.require;
-delete global.DTRACE_NET_SERVER_CONNECTION;
-delete global.DTRACE_NET_STREAM_END;
-delete global.DTRACE_HTTP_SERVER_REQUEST;
-delete global.DTRACE_HTTP_SERVER_RESPONSE;
-delete global.DTRACE_HTTP_CLIENT_REQUEST;
-delete global.DTRACE_HTTP_CLIENT_RESPONSE;
-delete global.GLOBAL;
 delete global.root;
+
+delete global.process;
+
+delete global.__dirname;
+delete global.__filename;
+
+delete global.Buffer;
+
+// constants NOTE: these are required by `request`
+// delete global.DTRACE_NET_SERVER_CONNECTION;
+// delete global.DTRACE_NET_STREAM_END;
+// delete global.DTRACE_HTTP_SERVER_REQUEST;
+// delete global.DTRACE_HTTP_SERVER_RESPONSE;
+// delete global.DTRACE_HTTP_CLIENT_REQUEST;
+// delete global.DTRACE_HTTP_CLIENT_RESPONSE;
+delete global.GLOBAL;
+
+// modules
 delete global.assert;
 delete global.async_hooks;
 delete global.buffer;
 delete global.child_process;
 delete global.cluster;
-delete global.crypto;
+// delete global.crypto;
 delete global.dgram;
 delete global.dns;
 delete global.domain;

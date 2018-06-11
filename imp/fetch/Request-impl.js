@@ -177,7 +177,7 @@ class RequestImpl {
     if (!headers.has("User-Agent")) {
       headers.set(
         "User-Agent",
-        (navigator && navigator.userAgent) ||
+        (global.navigator && global.navigator.userAgent) ||
           "platformparity-fetch/1.0 (https://github.com/platformparity/fetch)"
       );
     }

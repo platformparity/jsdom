@@ -1,6 +1,6 @@
-var globalContext = require("./index.js");
+const globalContext = require("./index.js");
 
-//%%
+// HACK
 function getAllKeys(obj) {
   var props = [];
 
@@ -11,37 +11,22 @@ function getAllKeys(obj) {
   return props;
 }
 
-//%%
-var keys = getAllKeys(globalContext);
-keys;
-
-//%%
-function evilMixin(target, source, keys) {
+function evilMixin(target, source) {
+  const keys = getAllKeys(source);
   for (let i = 0; i < keys.length; ++i) {
-    if (Reflect.has(target, keys[i])) {
-      continue;
-    }
-
-    // HACK:...
-    let x = source[keys[i]];
-    if (
-      typeof x === "function" &&
-      x.name[0] === String.prototype.toLowerCase.call(x.name[0]) // HACK
-    ) {
-      x = x.bind(target);
-    }
-
-    target[keys[i]] = x;
+    if (Reflect.has(target, keys[i])) continue;
+    target[keys[i]] = source[keys[i]];
     // Reflect.defineProperty(target, keys[i], Reflect.getOwnPropertyDescriptor(source, keys[i]));
   }
 }
 
-//%%
-
+// Use the first `toStrinTag` from `globalContext` instead:
 delete global[Symbol.toStringTag];
-evilMixin(global, globalContext, keys);
+// Will not be overwritten by our own `crypto` key otherwise:
+delete global.crypto;
+// to teh ting:
+evilMixin(global, globalContext);
 
-//%%
 Object.setPrototypeOf(
   global,
   require("./lib/WorkerGlobalScope.js").interface.prototype

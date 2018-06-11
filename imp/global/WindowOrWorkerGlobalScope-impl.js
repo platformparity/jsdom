@@ -14,10 +14,7 @@ class WindowOrWorkerGlobalScopeImpl {
   }
 }
 
-const setTimeout = global.setTimeout;
-const clearTimeout = global.setTimeout;
-const setInterval = global.setInterval;
-const clearInterval = global.clearInterval;
+const { setTimeout, clearTimeout, setInterval, clearInterval } = global;
 
 // Attach methods directly to prototype
 Object.assign(WindowOrWorkerGlobalScopeImpl.prototype, {

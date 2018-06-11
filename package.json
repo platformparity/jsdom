@@ -1,5 +1,5 @@
 {
-  "name": "@platformparity/jsdom",
+  "name": "@platformparity/platformparity",
   "version": "1.0.0-wip.0",
   "description": "A JavaScript implementation of many web standards",
   "main": "index.js",
@@ -14,6 +14,7 @@
   "dependencies": {
     "@platformparity/base64": "^1.0.0-wip.0",
     "@platformparity/dom-exception": "^1.0.0-wip.5",
+    "@platformparity/web-cryptography": "^1.0.0-wip.1",
     "encoding": "^0.1.12",
     "os-locale": "^2.1.0",
     "webidl-conversions": "platformparity/webidl-conversions#dd09029",
