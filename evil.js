@@ -2,7 +2,7 @@ const globalContext = require("./index.js");
 
 // HACK
 function getAllKeys(obj) {
-  var props = [];
+  let props = [];
 
   do {
     props = props.concat(Reflect.ownKeys(obj));

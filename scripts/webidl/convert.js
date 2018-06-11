@@ -10,6 +10,8 @@ const transformer = new Webidl2js({
   implSuffix: "-impl",
   suppressErrors: true,
   urlTypes: true,
+  skipWrapReturn: false,
+  skipConvertAny: true,
 });
 
 function addDir(dir) {
