@@ -16,7 +16,7 @@
     "@platformparity/dom-exception": "^1.0.0-wip.5",
     "encoding": "^0.1.12",
     "os-locale": "^2.1.0",
-    "webidl-conversions": "^4.0.2",
+    "webidl-conversions": "platformparity/webidl-conversions#dd09029",
     "whatwg-encoding": "^1.0.3",
     "whatwg-mimetype": "^2.1.0",
     "whatwg-url": "^6.4.1"
