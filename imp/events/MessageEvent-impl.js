@@ -5,7 +5,16 @@ const EventImpl = require("./Event-impl.js").implementation;
 const MessageEventInit = require("../../lib/MessageEventInit.js");
 
 class MessageEventImpl extends EventImpl {
-  initMessageEvent(type, bubbles, cancelable, data, origin, lastEventId, source, ports) {
+  initMessageEvent(
+    type,
+    bubbles,
+    cancelable,
+    data,
+    origin,
+    lastEventId,
+    source,
+    ports
+  ) {
     if (this._dispatchFlag) {
       return;
     }

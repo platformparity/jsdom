@@ -15,7 +15,9 @@ class EventTargetImpl {
     if (callback === undefined || callback === null) {
       callback = null;
     } else if (typeof callback !== "object" && typeof callback !== "function") {
-      throw new TypeError("Only undefined, null, an object, or a function are allowed for the callback parameter");
+      throw new TypeError(
+        "Only undefined, null, an object, or a function are allowed for the callback parameter"
+      );
     }
 
     options = normalizeEventHandlerOptions(options, ["capture", "once"]);
@@ -30,7 +32,10 @@ class EventTargetImpl {
 
     for (let i = 0; i < this._eventListeners[type].length; ++i) {
       const listener = this._eventListeners[type][i];
-      if (listener.options.capture === options.capture && listener.callback === callback) {
+      if (
+        listener.options.capture === options.capture &&
+        listener.callback === callback
+      ) {
         return;
       }
     }
@@ -45,7 +50,9 @@ class EventTargetImpl {
     if (callback === undefined || callback === null) {
       callback = null;
     } else if (typeof callback !== "object" && typeof callback !== "function") {
-      throw new TypeError("Only undefined, null, an object, or a function are allowed for the callback parameter");
+      throw new TypeError(
+        "Only undefined, null, an object, or a function are allowed for the callback parameter"
+      );
     }
 
     options = normalizeEventHandlerOptions(options, ["capture"]);
@@ -61,7 +68,10 @@ class EventTargetImpl {
 
     for (let i = 0; i < this._eventListeners[type].length; ++i) {
       const listener = this._eventListeners[type][i];
-      if (listener.callback === callback && listener.options.capture === options.capture) {
+      if (
+        listener.callback === callback &&
+        listener.options.capture === options.capture
+      ) {
         this._eventListeners[type].splice(i, 1);
         break;
       }
@@ -70,10 +80,16 @@ class EventTargetImpl {
 
   dispatchEvent(eventImpl) {
     if (eventImpl._dispatchFlag || !eventImpl._initializedFlag) {
-      throw new DOMException("Tried to dispatch an uninitialized event", "InvalidStateError");
+      throw new DOMException(
+        "Tried to dispatch an uninitialized event",
+        "InvalidStateError"
+      );
     }
     if (eventImpl.eventPhase !== Event.NONE) {
-      throw new DOMException("Tried to dispatch a dispatching event", "InvalidStateError");
+      throw new DOMException(
+        "Tried to dispatch a dispatching event",
+        "InvalidStateError"
+      );
     }
 
     eventImpl.isTrusted = false;
@@ -182,11 +198,13 @@ function invokeEventListeners(listeners, target, eventImpl) {
     }
 
     const listener = handlers[i];
-    const { capture, once/* , passive */ } = listener.options;
+    const { capture, once /* , passive */ } = listener.options;
 
-    if (listeners.indexOf(listener) === -1 ||
-        (eventImpl.eventPhase === Event.CAPTURING_PHASE && !capture) ||
-        (eventImpl.eventPhase === Event.BUBBLING_PHASE && capture)) {
+    if (
+      listeners.indexOf(listener) === -1 ||
+      (eventImpl.eventPhase === Event.CAPTURING_PHASE && !capture) ||
+      (eventImpl.eventPhase === Event.BUBBLING_PHASE && capture)
+    ) {
       continue;
     }
 
@@ -200,7 +218,10 @@ function invokeEventListeners(listeners, target, eventImpl) {
           listener.callback.handleEvent(idlUtils.wrapperForImpl(eventImpl));
         }
       } else {
-        listener.callback.call(idlUtils.wrapperForImpl(eventImpl.currentTarget), idlUtils.wrapperForImpl(eventImpl));
+        listener.callback.call(
+          idlUtils.wrapperForImpl(eventImpl.currentTarget),
+          idlUtils.wrapperForImpl(eventImpl)
+        );
       }
     } catch (e) {
       // FIXME: `_ownerDocument` ??
@@ -234,7 +255,11 @@ function normalizeEventHandlerOptions(options, defaultBoolKeys) {
   const returnValue = {};
 
   // no need to go further here
-  if (typeof options === "boolean" || options === null || typeof options === "undefined") {
+  if (
+    typeof options === "boolean" ||
+    options === null ||
+    typeof options === "undefined"
+  ) {
     returnValue.capture = Boolean(options);
     return returnValue;
   }

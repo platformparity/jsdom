@@ -1,4 +1,4 @@
-require('./evil.js');
+require("./evil.js");
 
 delete global.Buffer;
 delete global.__dirname;

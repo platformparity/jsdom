@@ -1,19 +1,19 @@
-var globalContext = require('./index.js');
+var globalContext = require("./index.js");
 
 //%%
-function getAllKeys( obj ) {
-    var props = [];
+function getAllKeys(obj) {
+  var props = [];
 
-    do {
-        props= props.concat(Reflect.ownKeys( obj ));
-    } while ( (obj = Reflect.getPrototypeOf( obj )) && obj !== Object.prototype );
+  do {
+    props = props.concat(Reflect.ownKeys(obj));
+  } while ((obj = Reflect.getPrototypeOf(obj)) && obj !== Object.prototype);
 
-    return props;
+  return props;
 }
 
 //%%
 var keys = getAllKeys(globalContext);
-keys
+keys;
 
 //%%
 function evilMixin(target, source, keys) {
@@ -25,8 +25,8 @@ function evilMixin(target, source, keys) {
     // HACK:...
     let x = source[keys[i]];
     if (
-      typeof x === 'function'
-      && x.name[0] === String.prototype.toLowerCase.call(x.name[0]) // HACK
+      typeof x === "function" &&
+      x.name[0] === String.prototype.toLowerCase.call(x.name[0]) // HACK
     ) {
       x = x.bind(target);
     }
@@ -34,12 +34,15 @@ function evilMixin(target, source, keys) {
     target[keys[i]] = x;
     // Reflect.defineProperty(target, keys[i], Reflect.getOwnPropertyDescriptor(source, keys[i]));
   }
-};
+}
 
 //%%
 
 delete global[Symbol.toStringTag];
-evilMixin(global, globalContext, keys)
+evilMixin(global, globalContext, keys);
 
 //%%
-Object.setPrototypeOf(global, require('./lib/WorkerGlobalScope.js').interface.prototype);
+Object.setPrototypeOf(
+  global,
+  require("./lib/WorkerGlobalScope.js").interface.prototype
+);

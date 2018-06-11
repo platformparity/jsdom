@@ -4,7 +4,7 @@ const { serializeURL, parseURL } = require("whatwg-url");
 // const { domSymbolTree } = require("./helpers/internal-constants.js");
 // const { parseURLToResultingURLRecord } = require("./helpers/document-base-url.js");
 
-exports.toFileUrl = function (fileName) {
+exports.toFileUrl = function(fileName) {
   // Beyond just the `path.resolve`, this is mostly for the benefit of Windows,
   // where we need to convert "\" to "/" and add an extra "/" prefix before the
   // drive letter.
@@ -81,7 +81,11 @@ exports.mixin = (target, source) => {
       continue;
     }
 
-    Object.defineProperty(target, keys[i], Object.getOwnPropertyDescriptor(source, keys[i]));
+    Object.defineProperty(
+      target,
+      keys[i],
+      Object.getOwnPropertyDescriptor(source, keys[i])
+    );
   }
 };
 
@@ -100,7 +104,7 @@ exports.memoizeQuery = function memoizeQuery(fn) {
 
   const type = memoizeQueryTypeCounter++;
 
-  return function () {
+  return function() {
     if (!this._memoizedQueries) {
       return fn.apply(this, arguments);
     }
@@ -112,7 +116,11 @@ exports.memoizeQuery = function memoizeQuery(fn) {
     let key;
     if (arguments.length === 1 && typeof arguments[0] === "string") {
       key = arguments[0];
-    } else if (arguments.length === 2 && typeof arguments[0] === "string" && typeof arguments[1] === "string") {
+    } else if (
+      arguments.length === 2 &&
+      typeof arguments[0] === "string" &&
+      typeof arguments[1] === "string"
+    ) {
       key = arguments[0] + "::" + arguments[1];
     } else {
       return fn.apply(this, arguments);
@@ -144,11 +152,11 @@ function isValidAbsoluteURL(str) {
   return parseURL(str) !== null;
 }
 
-exports.isValidTargetOrigin = function (str) {
+exports.isValidTargetOrigin = function(str) {
   return str === "*" || str === "/" || isValidAbsoluteURL(str);
 };
 
-exports.simultaneousIterators = function* (first, second) {
+exports.simultaneousIterators = function*(first, second) {
   for (;;) {
     const firstResult = first.next();
     const secondResult = second.next();

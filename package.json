@@ -28,7 +28,9 @@
   "scripts": {
     "test": "echo \"Warn: no test specified\" && exit 0",
     "clean": "rm -rf lib",
+    "format": "prettier --write \"imp/**/*.js\" index.js evil.js superevil.js",
     "build": "mkdir -p lib && node ./scripts/webidl/convert",
+    "preversion": "npm run format && git add .",
     "prepublishOnly": "npm run build"
   }
 }

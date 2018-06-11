@@ -1,6 +1,6 @@
 "use strict";
 const { EOL } = require("os");
-const { Buffer } = require('buffer');
+const { Buffer } = require("buffer");
 
 const Blob = require("../../lib/Blob.js");
 
@@ -82,10 +82,7 @@ exports.implementation = class BlobImpl {
     const span = Math.max(relativeEnd - relativeStart, 0);
 
     const buffer = this._buffer;
-    const slicedBuffer = buffer.slice(
-      relativeStart,
-      relativeStart + span
-    );
+    const slicedBuffer = buffer.slice(relativeStart, relativeStart + span);
 
     const blob = Blob.createImpl([[], { type: relativeContentType }], {});
     blob._buffer = slicedBuffer;

@@ -32,7 +32,9 @@ exports.implementation = class FormDataImpl {
   }
 
   getAll(name) {
-    return this._entries.filter(entry => entry.name === name).map(entry => entry.value);
+    return this._entries
+      .filter(entry => entry.name === name)
+      .map(entry => entry.value);
   }
 
   has(name) {
@@ -45,13 +47,15 @@ exports.implementation = class FormDataImpl {
     const foundIndex = this._entries.findIndex(e => e.name === name);
     if (foundIndex !== -1) {
       this._entries[foundIndex] = entry;
-      this._entries = this._entries.filter((e, i) => e.name !== name || i === foundIndex);
+      this._entries = this._entries.filter(
+        (e, i) => e.name !== name || i === foundIndex
+      );
     } else {
       this._entries.push(entry);
     }
   }
 
-  * [Symbol.iterator]() {
+  *[Symbol.iterator]() {
     for (const entry of this._entries) {
       yield [entry.name, idlUtils.tryWrapperForImpl(entry.value)];
     }
@@ -65,11 +69,7 @@ function createAnEntry(name, value, filename) {
 
   if (Blob.isImpl(value) && !File.isImpl(value)) {
     const oldValue = value;
-    value = File.createImpl([
-      [],
-      "blob",
-      { type: oldValue.type }
-    ]);
+    value = File.createImpl([[], "blob", { type: oldValue.type }]);
     // "representing the same bytes"
     value._buffer = oldValue._buffer;
   }

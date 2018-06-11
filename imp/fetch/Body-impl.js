@@ -3,7 +3,7 @@
 const Blob = require("../../lib/Blob.js");
 const FormData = require("../../lib/FormData.js");
 
-const { Buffer } = require('buffer');
+const { Buffer } = require("buffer");
 const Stream = require("stream");
 const { PassThrough } = Stream;
 
