@@ -1,5 +1,6 @@
 "use strict";
 const { EOL } = require("os");
+const { Buffer } = require('buffer');
 
 const Blob = require("../../lib/Blob.js");
 

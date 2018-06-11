@@ -1,7 +1,9 @@
 "use strict";
+
 const Blob = require("../../lib/Blob.js");
 const FormData = require("../../lib/FormData.js");
 
+const { Buffer } = require('buffer');
 const Stream = require("stream");
 const { PassThrough } = Stream;
 
@@ -75,8 +77,8 @@ class BodyImpl {
       rejectCurrentPromise: undefined
     };
 
-    this.nodeMaxChunkSize = size;
-    this.nodeTimeout = timeout;
+    this.nodeMaxChunkSize = nodeMaxChunkSize;
+    this.nodeTimeout = nodeTimeout;
 
     if (body instanceof Stream) {
       // handle stream error, such as incorrect content-encoding

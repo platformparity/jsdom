@@ -1,5 +1,6 @@
 "use strict";
 
+const { Buffer } = require('buffer');
 const whatwgEncoding = require("whatwg-encoding");
 const MIMEType = require("whatwg-mimetype");
 const querystring = require("querystring");
