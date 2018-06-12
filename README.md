@@ -34,11 +34,11 @@ Below is a print-out of everything that's available in a `Worker` in Chrome (67)
 
 #### Streams API
 
-- [ ] `ByteLengthQueuingStrategy`
-- [ ] `CountQueuingStrategy`
-- [ ] `ReadableStream`
-- [ ] `WritableStream`
-- [ ] `TransformStream`
+- [x] `ByteLengthQueuingStrategy`
+- [x] `CountQueuingStrategy`
+- [x] `ReadableStream`
+- [x] `WritableStream`
+- [x] `TransformStream`
 
 #### Encoding API
 
@@ -196,7 +196,7 @@ Actually part of the Worker API, I think. Investigate.
 - [ ] `PerformanceObserverEntryList`
 - [ ] `PerformanceObserver`
 - [ ] `PerformanceEntry`
-- [ ] `NavigationPreloadManager`
+- [ ] ~~`NavigationPreloadManager`~~
 - [ ] `StorageManager`
 - [ ] `performance`
 
