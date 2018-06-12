@@ -93,10 +93,10 @@ There's actually work to be done to alternate between polyfills and native impls
 
 #### Fetch API
 
-- [x] `Response`
-- [x] `Request`
+- [ ] `Response`
+- [ ] `Request`
 - [x] `Headers`
-- [x] `fetch` (minus Streams API stuff and `formData()`; no static methods)
+- [ ] `fetch` (minus Streams API stuff and `formData()`; no static methods)
 
 #### Form data (part of XHR stuff...)
 
