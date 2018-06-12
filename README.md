@@ -11,15 +11,17 @@ Below is a print-out of everything that's available in a `Worker` in Chrome (67)
 - [x] `WorkerGlobalScope`
 - [x] `WorkerNavigator`
 - [x] `WorkerLocation`
+- [x] `ErrorEvent`
+- [x] `PromiseRejectionEvent`
 - [x] `self`
 - [x] `location`
 - [x] `navigator`
-- [x] `onerror` (never fired)
-- [x] `onlanguagechange` (never fired; not actually part of chrome but in spec)
-- [x] `onoffline` (never fired; not actually part of chrome but in spec)
-- [x] `ononline` (never fired; not actually part of chrome but in spec)
-- [x] `onrejectionhandled` (never fired)
-- [x] `onunhandledrejection`(never fired)
+- [x] `onerror`
+- [x] `onlanguagechange` (never fired)
+- [x] `onoffline` (never fired)
+- [x] `ononline` (never fired)
+- [x] `onrejectionhandled`
+- [x] `onunhandledrejection`
 - [x] `importScripts`
 - [x] `origin`
 - [ ] `isSecureContext`
@@ -94,7 +96,7 @@ There's actually work to be done to alternate between polyfills and native impls
 - [x] `Response`
 - [x] `Request`
 - [x] `Headers`
-- [x] `fetch` (minus Streams API stuff and `formData()`)
+- [x] `fetch` (minus Streams API stuff and `formData()`; no static methods)
 
 #### Form data (part of XHR stuff...)
 
@@ -107,6 +109,7 @@ There's actually work to be done to alternate between polyfills and native impls
 - [x] `FileList`
 - [x] `FileReader`
 - [ ] ~~`FileReaderSync`~~
+- [x] `ProgressEvent`
 
 #### Events
 
@@ -140,11 +143,7 @@ Could implement on top of IndexedDB or just write response bodies to the file sy
 
 ### Uncategorized
 
-- [ ] `TEMPORARY`
-- [ ] `PERSISTENT`
 - [ ] ~~`ServiceWorkerRegistration`~~
-- [ ] `PromiseRejectionEvent`
-- [x] `ProgressEvent`
 - [ ] ~~`DOMStringList`~~
 - [x] `DOMException`
 - [x] `BigInt` (part of node since v?)
@@ -181,6 +180,8 @@ Actually part of the Worker API, I think. Investigate.
 
 #### Weird shit
 
+- [ ] `TEMPORARY`
+- [ ] `PERSISTENT`
 - [ ] `PushSubscriptionOptions`
 - [ ] `PushSubscription`
 - [ ] `PushManager`

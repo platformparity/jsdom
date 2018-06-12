@@ -71,7 +71,7 @@ class FileReaderImpl extends EventTargetImpl {
   _fireProgressEvent(name, props) {
     const event = ProgressEvent.createImpl(
       [name, Object.assign({ bubbles: false, cancelable: false }, props)],
-      {}
+      { isTrusted: true }
     );
     this.dispatchEvent(event);
   }
