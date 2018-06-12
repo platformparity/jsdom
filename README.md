@@ -77,7 +77,7 @@ Supported through @trust/web-crypto.
 - [ ] `CloseEvent`
 - [ ] `BroadcastChannel`
 - [ ] `MessagePort`
-- [x] `MessageEvent`
+- [ ] `MessageEvent`
 - [ ] `MessageChannel`
 - [ ] `onmessage`
 - [ ] `onmessageerror`
