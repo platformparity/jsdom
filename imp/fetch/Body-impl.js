@@ -12,6 +12,7 @@ const { ReadableStream, nodeToWeb } = require("@platformparity/streams");
 
 const convert = require("encoding").convert;
 
+// TODO: don't bother with the symbol, since impl class isn't exposed anyway
 const INTERNALS = Symbol("Body internals");
 
 class BodyImpl {
@@ -53,21 +54,18 @@ class BodyImpl {
   // ---------------
 
   bodyConstructor([source]) {
-    const stream = new PassThrough();
-    const [content, contentType] = this.doTehTing(source);
+    const [content, contentType] = this.extractContent(source);
 
-    // FIXME: If keepalive flag is set and object’s type is a ReadableStream object, then throw a TypeError.
-
-    stream.end(content);
-    const body = nodeToWeb(stream);
-
-    this[INTERNALS] = {
-      body,
-      source: source instanceof ReadableStream ? null : source
-      // disturbed: false,
-      // error: null
-      // rejectCurrentPromise: undefined
-    };
+    if (content instanceof ReadableStream) {
+      // FIXME: If keepalive flag is set and object’s type is a ReadableStream object,
+      // then throw a TypeError.
+      this[INTERNALS] = { body: content, source: null };
+    } else {
+      const stream = new PassThrough();
+      stream.end(content);
+      const body = nodeToWeb(stream);
+      this[INTERNALS] = { body, source };
+    }
 
     // TODO: assume headers is present, and set directly?
     return contentType;
@@ -108,7 +106,7 @@ class BodyImpl {
     if (this.body.locked) {
       return Promise.reject(new TypeError("body stream locked")); // FIXME: same error as browser impls?
     } else if (this.body._disturbed) {
-      return Promise.reject(new TypeError("body stream already read"));
+      return Promise.reject(new TypeError("body stream already read")); // FIXME: same error as brower?
     }
 
     const stream = this.body || new ReadableStream();
@@ -174,7 +172,7 @@ class BodyImpl {
   */
 
   // FIXME: rename
-  doTehTing(source) {
+  extractContent(source) {
     if (source === null) {
       return [Buffer.alloc(0), null];
     }
@@ -361,14 +359,25 @@ class BodyImpl {
    * @return  Mixed
    */
   cloneBody() {
-    const { body, bodyUsed } = this;
+    try {
+      const [out1, out2] = this.body.tee();
 
-    // don't allow cloning a used body
-    if (bodyUsed) {
+      // const that = {};
+      // for (const prop in this[INTERNALS]) {
+      //   that[INTERNALS][prop] = this[INTERNALS][prop];
+      // }
+
+      this[INTERNALS].body = out1;
+      // that[INTERNALS].body = out2;
+
+      return out2;
+    } catch (e) {
+      // FIXME: ???
       throw new Error("cannot clone body after it is used");
     }
 
-    const [] = this.body.tee();
+    // if (bodyUsed) {
+    // }
     // // check that body is a stream and not form-data object
     // // FIXME: we can't clone the form-data object without having it as a dependency
     // if (body instanceof Stream && typeof body.getBoundary !== "function") {
@@ -381,42 +390,8 @@ class BodyImpl {
     //   this[INTERNALS].body = p1;
     //   return p2;
     // }
-
-    return body;
+    // return body;
   }
-
-  /**
-   * Performs the operation "extract a `Content-Type` value from |object|" as
-   * specified in the specification:
-   * https://fetch.spec.whatwg.org/#concept-bodyinit-extract
-   *
-   * This function assumes that body is present.
-   */
-  /*
-  extractContentType(body) {
-    // istanbul ignore if: Currently, because of a guard in Request, body
-    // can never be null. Included here for completeness.
-    if (body === null) {
-      return null;
-    } else if (typeof body === "string") {
-      return "text/plain;charset=UTF-8";
-    } else if (body instanceof URLSearchParams) {
-      return "application/x-www-form-urlencoded;charset=UTF-8";
-    } else if (Blob.isImpl(body)) {
-      return body.type || null;
-    } else if (body instanceof ArrayBuffer) {
-      return null;
-    } else if (ArrayBuffer.isView(body)) {
-      return null;
-    } else if (typeof body.getBoundary === "function") {
-      return `multipart/form-data;boundary=${body.getBoundary()}`;
-    } else {
-      // body is stream
-      // can't really do much about this
-      return null;
-    }
-  }
-  */
 
   /**
    * The Fetch Standard treats this as if "total bytes" is a property on the body.
