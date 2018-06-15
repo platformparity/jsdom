@@ -37,16 +37,20 @@ exports.implementation = class BlobImpl {
 
     this._buffer = Buffer.concat(buffers);
 
-    this.type = properties.type;
+    this._type = properties.type;
     if (/[^\u0020-\u007E]/.test(this.type)) {
-      this.type = "";
+      this._type = "";
     } else {
-      this.type = this.type.toLowerCase();
+      this._type = this._type.toLowerCase();
     }
   }
 
   get size() {
     return this._buffer.length;
+  }
+
+  get type() {
+    return this._type;
   }
 
   slice(start, end, contentType) {
