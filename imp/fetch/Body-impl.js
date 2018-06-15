@@ -20,22 +20,19 @@ class BodyImpl {
   }
 
   get bodyUsed() {
-    return this[INTERNALS].disturbed;
+    // return this[INTERNALS].disturbed;
+    return this[INTERNALS].body._disturbed;
   }
 
   arrayBuffer() {
-    throw new Error("not implemented");
-    // return this.consumeBody().then(buf =>
-    //   buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength)
-    // );
+    return this.consumeBody().then(buf =>
+      buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength)
+    );
   }
 
   blob() {
-    throw new Error("not implemented");
-    // let ct = (this.headers && this.headers.get("content-type")) || "";
-    // return this.consumeBody().then(buf =>
-    //   Blob.create([[buf], { type: ct.toLowerCase() }])
-    // );
+    const type = (this.headers && this.headers.get("content-type")) || "";
+    return this.consumeBody().then(buf => Blob.create([[buf], { type }]));
   }
 
   formData() {
@@ -43,66 +40,89 @@ class BodyImpl {
   }
 
   json() {
-    throw new Error("not implemented");
-    // return this.consumeBody().then(buffer => {
-    //   return JSON.parse(buffer.toString());
-    // });
+    return this.consumeBody().then(buffer => {
+      return JSON.parse(buffer.toString());
+    });
   }
 
   text() {
-    throw new Error("not implemented");
-    // return this.consumeBody().then(buffer => buffer.toString());
+    return this.consumeBody().then(buffer => buffer.toString());
   }
 
   // PRIVATE METHODS
   // ---------------
 
-  bodyConstructor([bodyInit]) {
-    const bodyStream = new PassThrough();
-    const [content, contentType] = this.doTehTing(bodyInit);
+  bodyConstructor([source]) {
+    const stream = new PassThrough();
+    const [content, contentType] = this.doTehTing(source);
 
-    bodyStream.end(content);
-    const body = nodeToWeb(bodyStream);
+    // FIXME: If keepalive flag is set and object’s type is a ReadableStream object, then throw a TypeError.
+
+    stream.end(content);
+    const body = nodeToWeb(stream);
 
     this[INTERNALS] = {
       body,
-      disturbed: false,
-      error: null,
-      rejectCurrentPromise: undefined
+      source: source instanceof ReadableStream ? null : source
+      // disturbed: false,
+      // error: null
+      // rejectCurrentPromise: undefined
     };
 
+    // TODO: assume headers is present, and set directly?
     return contentType;
 
     // NOTE: Sorry, we're not dealing with node streams anymore.
-    // this.nodeMaxChunkSize = nodeMaxChunkSize;
-    // this.nodeTimeout = nodeTimeout;
-    //
-    // if (body instanceof Stream) {
-    //   // handle stream error, such as incorrect content-encoding
-    //   body.on("error", err => {
-    //     let error;
-    //     if (err instanceof Error) {
-    //       error = err;
-    //     } else {
-    //       error = new Error(
-    //         `Invalid response body while trying to fetch ${this.url}: ${
-    //           err.message
-    //         }`,
-    //         "system",
-    //         err
-    //       );
-    //     }
-    //     const { rejectCurrentPromise } = this[INTERNALS];
-    //     if (typeof rejectCurrentPromise === "function") {
-    //       rejectCurrentPromise(error);
-    //     } else {
-    //       this[INTERNALS].error = error;
-    //     }
-    //   });
-    // }
+    /*
+    this.nodeMaxChunkSize = nodeMaxChunkSize;
+    this.nodeTimeout = nodeTimeout;
+
+    if (body instanceof Stream) {
+      // handle stream error, such as incorrect content-encoding
+      body.on("error", err => {
+        let error;
+        if (err instanceof Error) {
+          error = err;
+        } else {
+          error = new Error(
+            `Invalid response body while trying to fetch ${this.url}: ${
+              err.message
+            }`,
+            "system",
+            err
+          );
+        }
+        const { rejectCurrentPromise } = this[INTERNALS];
+        if (typeof rejectCurrentPromise === "function") {
+          rejectCurrentPromise(error);
+        } else {
+          this[INTERNALS].error = error;
+        }
+      });
+    }
+    */
   }
 
+  // https://fetch.spec.whatwg.org/#concept-body-consume-body
   consumeBody() {
+    if (this.body.locked) {
+      return Promise.reject(new TypeError("body stream locked")); // FIXME: same error as browser impls?
+    } else if (this.body._disturbed) {
+      return Promise.reject(new TypeError("body stream already read"));
+    }
+
+    const stream = this.body || new ReadableStream();
+
+    let reader;
+    try {
+      reader = stream.getReader();
+    } catch (e) {
+      return Promise.reject(e);
+    }
+
+    return this.readAllBytes(reader);
+
+    /*
     if (this[INTERNALS].disturbed) {
       return Promise.reject(new TypeError(`body stream already read`));
     }
@@ -114,53 +134,90 @@ class BodyImpl {
     }
 
     return Promise.resolve(null);
+    */
   }
 
+  // https://fetch.spec.whatwg.org/#concept-read-all-bytes-from-readablestream
+  async readAllBytes(reader) {
+    const bytes = [];
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done === false && value instanceof Uint8Array) {
+        bytes.push(value);
+      } else if (done === true) {
+        return Buffer.concat(bytes);
+      } else {
+        throw new TypeError("not done and value not type of Uint8Array");
+      }
+    }
+  }
+
+  /*
+  function readAllBytes(reader) {
+    const bytes = [];
+
+    return pump();
+
+    function pump() {
+      return reader.read().then(({ value, done }) => {
+        if (done === false && value instanceof Uint8Array) {
+          bytes.push(value);
+          return pump(); // TODO: call stack size?
+        } else if (done === true) {
+          return Buffer.concat(bytes);
+        } else {
+          throw new TypeError("not done and value not type of Uint8Array");
+        }
+      });
+    }
+  }
+  */
+
   // FIXME: rename
-  doTehTing(bodyInit) {
-    if (bodyInit === null) {
+  doTehTing(source) {
+    if (source === null) {
       return [Buffer.alloc(0), null];
     }
 
-    if (Blob.isImpl(bodyInit)) {
-      return [bodyInit._buffer, bodyInit.type || null];
+    if (Blob.isImpl(source)) {
+      return [source._buffer, source.type || null];
     }
 
-    if (bodyInit instanceof ArrayBuffer) {
-      return [Buffer.from(bodyInit), null];
+    if (source instanceof ArrayBuffer) {
+      return [Buffer.from(source), null];
     }
 
-    if (ArrayBuffer.isView(bodyInit)) {
-      return [Buffer.from(bodyInit), null]; // FIXME: is this right?
+    if (ArrayBuffer.isView(source)) {
+      return [Buffer.from(source), null]; // FIXME: is this right?
     }
 
-    if (FormData.isImpl(bodyInit)) {
+    if (FormData.isImpl(source)) {
       // ("multipart/form-data; boundary=----TODO");
       throw Error("not implemented");
     }
 
-    if (bodyInit instanceof URLSearchParams) {
+    if (source instanceof URLSearchParams) {
       // ("application/x-www-form-urlencoded;charset=UTF-8");
       throw Error("not implemented");
     }
 
-    if (bodyInit instanceof ReadableStream) {
-      return [bodyInit, null];
+    if (source instanceof ReadableStream) {
+      return [source, null];
     }
 
-    if (typeof bodyInit === "string") {
-      return [Buffer.from(bodyInit), "text/plain;charset=UTF-8"];
+    if (typeof source === "string") {
+      return [Buffer.from(source), "text/plain;charset=UTF-8"];
     }
 
     throw Error("this should never happen");
 
     // NOTE: Sorry, we're not dealing with node streams anymore.
     // // istanbul ignore if: should never happen
-    // if (!(bodyInit instanceof Stream)) {
+    // if (!(source instanceof Stream)) {
     //   return Buffer.alloc(0);
     // }
     //
-    // // bodyInit is stream
+    // // source is stream
     // // get ready to actually consume the body
     // let accum = [];
     // let accumBytes = 0;
@@ -186,7 +243,7 @@ class BodyImpl {
     //
     //   this[INTERNALS].rejectCurrentPromise = reject;
     //
-    //   bodyInit.on("data", chunk => {
+    //   source.on("data", chunk => {
     //     if (abort || chunk === null) {
     //       return;
     //     }
@@ -211,7 +268,7 @@ class BodyImpl {
     //     accum.push(chunk);
     //   });
     //
-    //   bodyInit.once("end", () => {
+    //   source.once("end", () => {
     //     if (abort) {
     //       return;
     //     }
@@ -335,6 +392,7 @@ class BodyImpl {
    *
    * This function assumes that body is present.
    */
+  /*
   extractContentType(body) {
     // istanbul ignore if: Currently, because of a guard in Request, body
     // can never be null. Included here for completeness.
@@ -358,6 +416,7 @@ class BodyImpl {
       return null;
     }
   }
+  */
 
   /**
    * The Fetch Standard treats this as if "total bytes" is a property on the body.
@@ -368,6 +427,7 @@ class BodyImpl {
    * @return  Number?            Number of bytes, or null if not possible
    */
   getTotalBytes() {
+    /*
     const { body } = this;
 
     // istanbul ignore if: included for completion
@@ -407,12 +467,15 @@ class BodyImpl {
       // can't really do much about this
       return null;
     }
+    */
   }
 
   /**
    * Write a Body to a Node.js WritableStream (e.g. http.Request) object.
    */
   writeToStream(dest) {
+    // TODO: webToNode stream?
+    /*
     const { body } = this;
 
     if (body === null) {
@@ -446,37 +509,8 @@ class BodyImpl {
       // body is stream
       body.pipe(dest);
     }
+    */
   }
-}
-
-/**
- * Detect a URLSearchParams object
- * ref: https://github.com/bitinn/node-fetch/issues/296#issuecomment-307598143
- *
- * @param   Object  obj     Object to detect by type or brand
- * @return  String
- */
-function isURLSearchParams(obj) {
-  // FIXME: replace with `instanceof` !?
-  // Duck-typing as a necessary condition.
-  if (
-    typeof obj !== "object" ||
-    typeof obj.append !== "function" ||
-    typeof obj.delete !== "function" ||
-    typeof obj.get !== "function" ||
-    typeof obj.getAll !== "function" ||
-    typeof obj.has !== "function" ||
-    typeof obj.set !== "function"
-  ) {
-    return false;
-  }
-
-  // Brand-checking and more duck-typing as optional condition.
-  return (
-    obj.constructor.name === "URLSearchParams" ||
-    Object.prototype.toString.call(obj) === "[object URLSearchParams]" ||
-    typeof obj.sort === "function"
-  );
 }
 
 exports.implementation = BodyImpl;
