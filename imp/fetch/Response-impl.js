@@ -11,18 +11,24 @@ const { STATUS_CODES } = require("http");
 const INTERNALS = Symbol("Response internals");
 
 class ResponseImpl {
-  constructor(args) {
-    this.bodyConstructor(args);
-
-    const [body, init] = args;
+  constructor([body, init]) {
+    // FIXME: side effects in "constructor"
+    const contentType = this.bodyConstructor([body]);
 
     const status = init.status || 200;
+
+    const headers = Headers.createImpl([init.headers]);
+    if (body != null) {
+      if (contentType !== null && !headers.has("Content-Type")) {
+        headers.append("Content-Type", contentType);
+      }
+    }
 
     this[INTERNALS] = {
       url: init.url || "",
       status,
       statusText: init.statusText || STATUS_CODES[status],
-      headers: Headers.createImpl([init.headers])
+      headers
     };
   }
 

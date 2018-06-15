@@ -37,18 +37,11 @@ class RequestImpl {
           ? input.cloneBody()
           : null;
 
-    this.bodyConstructor([
-      inputBody,
-      {
-        nodeTimeout: init.nodeTimeout || input.nodeTimeout || 0,
-        nodeMaxChunkSize: init.nodeMaxChunkSize || input.nodeMaxChunkSize || 0
-      }
-    ]);
+    // FIXME: side effects in "constructor"
+    const contentType = this.bodyConstructor([inputBody]);
 
     const headers = Headers.createImpl([init.headers || input.headers || {}]);
-
     if (init.body != null) {
-      const contentType = this.extractContentType();
       if (contentType !== null && !headers.has("Content-Type")) {
         headers.append("Content-Type", contentType);
       }
