@@ -13,6 +13,10 @@ const https = require("https");
 const { PassThrough } = require("stream");
 const { resolve: resolveURL } = require("url");
 const zlib = require("zlib");
+const {
+  readableStreamFromNode,
+  writableStreamFromNode
+} = require("@platformparity/streams");
 
 class PartialWindowOrWorkerGlobalScopeImpl {
   fetch(input, init) {
@@ -182,7 +186,9 @@ class PartialWindowOrWorkerGlobalScopeImpl {
 
         // prepare response
         res.on("error", errorHandler);
+
         body = res.pipe(new PassThrough());
+
         const responseOptions = {
           url: request.url,
           status: res.statusCode,
@@ -210,7 +216,9 @@ class PartialWindowOrWorkerGlobalScopeImpl {
           res.statusCode === 204 ||
           res.statusCode === 304
         ) {
-          resolve(Response.create([body, responseOptions]));
+          resolve(
+            Response.create([readableStreamFromNode(body), responseOptions])
+          );
           return;
         }
 
@@ -227,7 +235,9 @@ class PartialWindowOrWorkerGlobalScopeImpl {
         // for gzip
         if (codings == "gzip" || codings == "x-gzip") {
           body = body.pipe(zlib.createGunzip(zlibOptions));
-          resolve(Response.create([body, responseOptions]));
+          resolve(
+            Response.create([readableStreamFromNode(body), responseOptions])
+          );
           return;
         }
 
@@ -243,16 +253,20 @@ class PartialWindowOrWorkerGlobalScopeImpl {
             } else {
               body = body.pipe(zlib.createInflateRaw());
             }
-            resolve(Response.create([body, responseOptions]));
+            resolve(
+              Response.create([readableStreamFromNode(body), responseOptions])
+            );
           });
           return;
         }
 
         // otherwise, use response as-is
-        resolve(Response.create([body, responseOptions]));
+        resolve(
+          Response.create([readableStreamFromNode(body), responseOptions])
+        );
       });
 
-      request.writeToStream(req);
+      request.body.pipeTo(writableStreamFromNode(req));
     });
   }
 

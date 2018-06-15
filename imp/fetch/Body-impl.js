@@ -8,7 +8,10 @@ const Stream = require("stream");
 const { PassThrough } = Stream;
 
 const { URLSearchParams } = require("url");
-const { ReadableStream, nodeToWeb } = require("@platformparity/streams");
+const {
+  ReadableStream,
+  readableStreamFromNode
+} = require("@platformparity/streams");
 
 const convert = require("encoding").convert;
 
@@ -25,6 +28,7 @@ class BodyImpl {
     return this[INTERNALS].body._disturbed;
   }
 
+  // FIXME: pass "method" rather than chain, similar to spec..
   arrayBuffer() {
     return this.consumeBody().then(buf =>
       buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength)
@@ -54,17 +58,23 @@ class BodyImpl {
   // ---------------
 
   bodyConstructor([source]) {
-    const [content, contentType] = this.extractContent(source);
+    const [content, contentType, totalBytes] = this.extractContent(source);
+
+    // meh...
+    this[INTERNALS] = {
+      transmittedBytes: 0,
+      totalBytes
+    };
 
     if (content instanceof ReadableStream) {
       // FIXME: If keepalive flag is set and object’s type is a ReadableStream object,
       // then throw a TypeError.
-      this[INTERNALS] = { body: content, source: null };
+      Object.assign(this[INTERNALS], { body: content, source: null });
     } else {
       const stream = new PassThrough();
       stream.end(content);
-      const body = nodeToWeb(stream);
-      this[INTERNALS] = { body, source };
+      const body = readableStreamFromNode(stream);
+      Object.assign(this[INTERNALS], { body, source });
     }
 
     // TODO: assume headers is present, and set directly?
@@ -174,19 +184,23 @@ class BodyImpl {
   // FIXME: rename
   extractContent(source) {
     if (source === null) {
-      return [Buffer.alloc(0), null];
+      return [Buffer.alloc(0), null, 0];
     }
 
     if (Blob.isImpl(source)) {
-      return [source._buffer, source.type || null];
+      return [source._buffer, source.type, source.size];
     }
 
     if (source instanceof ArrayBuffer) {
-      return [Buffer.from(source), null];
+      return [Buffer.from(source), null, source.byteLength];
     }
 
     if (ArrayBuffer.isView(source)) {
-      return [Buffer.from(source), null]; // FIXME: is this right?
+      return [
+        Buffer.from(source, source.byteOffset, source.byteLength),
+        null,
+        source.byteLength
+      ];
     }
 
     if (FormData.isImpl(source)) {
@@ -195,16 +209,21 @@ class BodyImpl {
     }
 
     if (source instanceof URLSearchParams) {
-      // ("application/x-www-form-urlencoded;charset=UTF-8");
-      throw Error("not implemented");
+      const buffer = Buffer.from(String(body));
+      return [
+        buffer,
+        "application/x-www-form-urlencoded;charset=UTF-8",
+        buffer.byteLength
+      ];
     }
 
     if (source instanceof ReadableStream) {
-      return [source, null];
+      return [source, null, null];
     }
 
     if (typeof source === "string") {
-      return [Buffer.from(source), "text/plain;charset=UTF-8"];
+      const buffer = Buffer.from(source);
+      return [buffer, "text/plain;charset=UTF-8", buffer.byteLength];
     }
 
     throw Error("this should never happen");
@@ -402,89 +421,8 @@ class BodyImpl {
    * @return  Number?            Number of bytes, or null if not possible
    */
   getTotalBytes() {
-    /*
-    const { body } = this;
-
-    // istanbul ignore if: included for completion
-    if (body === null) {
-      // body is null
-      return 0;
-    } else if (typeof body === "string") {
-      // body is string
-      return Buffer.byteLength(body);
-    } else if (isURLSearchParams(body)) {
-      // body is URLSearchParams
-      return Buffer.byteLength(String(body));
-    } else if (Blob.isImpl(body)) {
-      // body is blob
-      return body.size;
-    } else if (Buffer.isBuffer(body)) {
-      // body is buffer
-      return body.length;
-    } else if (body instanceof ArrayBuffer) {
-      // body is ArrayBuffer
-      return body.byteLength;
-    } else if (ArrayBuffer.isView(body)) {
-      // body is ArrayBufferView
-      return body.byteLength;
-    } else if (body && typeof body.getLengthSync === "function") {
-      // detect form data input from form-data module
-      if (
-        (body._lengthRetrievers && body._lengthRetrievers.length == 0) || // 1.x
-        (body.hasKnownLength && body.hasKnownLength())
-      ) {
-        // 2.x
-        return body.getLengthSync();
-      }
-      return null;
-    } else {
-      // body is stream
-      // can't really do much about this
-      return null;
-    }
-    */
-  }
-
-  /**
-   * Write a Body to a Node.js WritableStream (e.g. http.Request) object.
-   */
-  writeToStream(dest) {
-    // TODO: webToNode stream?
-    /*
-    const { body } = this;
-
-    if (body === null) {
-      // body is null
-      dest.end();
-    } else if (typeof body === "string") {
-      // body is string
-      dest.write(body);
-      dest.end();
-    } else if (isURLSearchParams(body)) {
-      // body is URLSearchParams
-      dest.write(Buffer.from(String(body)));
-      dest.end();
-    } else if (Blob.isImpl(body)) {
-      // body is blob
-      dest.write(body._buffer);
-      dest.end();
-    } else if (Buffer.isBuffer(body)) {
-      // body is buffer
-      dest.write(body);
-      dest.end();
-    } else if (body instanceof ArrayBuffer) {
-      // body is ArrayBuffer
-      dest.write(Buffer.from(body));
-      dest.end();
-    } else if (ArrayBuffer.isView(body)) {
-      // body is ArrayBufferView
-      dest.write(Buffer.from(body.buffer, body.byteOffset, body.byteLength));
-      dest.end();
-    } else {
-      // body is stream
-      body.pipe(dest);
-    }
-    */
+    // FIXME: not copies by clone...
+    return this[INTERNALS].totalBytes;
   }
 }
 
