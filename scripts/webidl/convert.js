@@ -9,9 +9,19 @@ const Webidl2js = require("webidl2js");
 const transformer = new Webidl2js({
   implSuffix: "-impl",
   suppressErrors: true,
-  urlTypes: true,
+  // urlTypes: true,
   skipWrapReturn: false,
-  skipConvertAny: true,
+  // skipConvertAny: true,
+  externalTypes: {
+    url: ["URL", "URLSearchParams"],
+    "@platformparity/streams": [
+      "ReadableStream",
+      "WritableStream",
+      "TransformStream",
+      "ByteLengthQueuingStrategy",
+      "CountQueuingStrategy"
+    ]
+  }
 });
 
 function addDir(dir) {
