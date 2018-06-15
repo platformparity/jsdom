@@ -113,8 +113,14 @@ class RequestImpl {
   // get redirect() {} // Already implemented (see above)
   // get integrity() {}
   // get keepalive() {}
-  // get isReloadNavigation() {}
-  // get isHistoryNavigation() {}
+
+  get isReloadNavigation() {
+    return false;
+  }
+
+  get isHistoryNavigation() {
+    return false;
+  }
 
   get signal() {
     return this[INTERNALS].signal;
