@@ -4,15 +4,23 @@
 
 Copyright (c) 2018 Florian Klampfer <https://qwtel.com/>
 
-This software also uses portions of the `jsdom/jsdom`
-project, which is MIT licensed with the following copyright
+This software also uses portions of the
+`jsdom/jsdom`
+project, which is MIT licensed with the following copyright:
 
 > Copyright (c) 2010 Elijah Insua
 
-This software also uses portions of the `bitinn/node-fetch`
-project, which is MIT licensed with the following copyright
+This software also uses portions of the
+`bitinn/node-fetch`
+project, which is MIT licensed with the following copyright:
 
 > Copyright (c) 2016 David Frank
+
+This software also uses portions of the
+`jimmywarting/FormData`
+project, which is MIT licensed with the following copyright:
+
+> Copyright (c) 2016 Jimmy Karl Roland Wärting
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation

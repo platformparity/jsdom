@@ -13,10 +13,24 @@ const {
   readableStreamFromNode
 } = require("@platformparity/streams");
 
+const crypto = require("@trust/webcrypto");
+
 const convert = require("encoding").convert;
 
 // TODO: don't bother with the symbol, since impl class isn't exposed anyway
 const INTERNALS = Symbol("Body internals");
+
+// NOTE: `n` MUST NOT be greater than 32768.
+// NOTE: `allowedChars` MUST NOT exceed 65535 chars.
+function randomString(
+  n,
+  allowedChars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+) {
+  const { length } = allowedChars;
+  const random = crypto.getRandomValues(new Uint16Array(n));
+  const scaled = random.map(x => (x / 65536) * length);
+  return Array.prototype.map.call(scaled, x => allowedChars.charAt(x)).join("");
+}
 
 class BodyImpl {
   get body() {
@@ -220,16 +234,20 @@ class BodyImpl {
     }
 
     if (FormData.isImpl(input)) {
-      // ("multipart/form-data; boundary=----TODO");
-      throw Error("not implemented");
+      const [content, boundary] = this.formDataToBuffer(input);
+      return {
+        content,
+        mimeType: `multipart/form-data; boundary=${boundary}`,
+        totalBytes: content.byteLength
+      };
     }
 
     if (input instanceof URLSearchParams) {
-      const buffer = Buffer.from(String(body));
+      const content = Buffer.from(String(body));
       return {
-        content: buffer,
+        content,
         mimeType: "application/x-www-form-urlencoded;charset=UTF-8",
-        totalBytes: buffer.byteLength
+        totalBytes: content.byteLength
       };
     }
 
@@ -242,11 +260,11 @@ class BodyImpl {
     }
 
     if (typeof input === "string") {
-      const buffer = Buffer.from(input);
+      const content = Buffer.from(input);
       return {
-        content: buffer,
+        content,
         mimeType: "text/plain;charset=UTF-8",
-        totalBytes: buffer.byteLength
+        totalBytes: content.byteLength
       };
     }
 
@@ -332,6 +350,47 @@ class BodyImpl {
     //     }
     //   });
     // });
+  }
+
+  formDataToBuffer(formData) {
+    const PREFIX = "PlatformParity";
+    const LINE_BREAK = Buffer.from("\r\n");
+    const DEFAULT_CONTENT_TYPE = "application/octet-stream";
+
+    const boundary = `----${PREFIX}FormBoundary${randomString(16)}`;
+    const chunks = [];
+
+    for (const { name, value } of formData._entries) {
+      chunks.push(Buffer.from(`--${boundary}`), LINE_BREAK);
+
+      if (Blob.isImpl(value)) {
+        const file = value;
+        const filename = file.name;
+        chunks.push(
+          Buffer.from(
+            `Content-Disposition: form-data; name="${name}"; filename="${filename}"`
+          ),
+          LINE_BREAK,
+          Buffer.from(`Content-Type: ${file.type || DEFAULT_CONTENT_TYPE}`),
+          LINE_BREAK,
+          LINE_BREAK,
+          file._buffer,
+          LINE_BREAK
+        );
+      } else {
+        chunks.push(
+          Buffer.from(`Content-Disposition: form-data; name="${name}"`),
+          LINE_BREAK,
+          LINE_BREAK,
+          Buffer.from(`${value}`),
+          LINE_BREAK
+        );
+      }
+    }
+
+    chunks.push(Buffer.from(`--${boundary}--`), LINE_BREAK);
+
+    return [Buffer.concat(chunks), boundary];
   }
 
   // TODO: this doesn't belong here

@@ -57,6 +57,7 @@ exports.implementation = class FormDataImpl {
 
   *[Symbol.iterator]() {
     for (const entry of this._entries) {
+      // FIXME: don't yield impls?
       yield [entry.name, idlUtils.tryWrapperForImpl(entry.value)];
     }
   }

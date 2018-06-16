@@ -39,7 +39,7 @@ const { TextEncoder, TextDecoder } = require("text-encoding");
 const Crypto = require("@trust/webcrypto/src/Crypto.js");
 const SubtleCrypto = require("@trust/webcrypto/src/SubtleCrypto.js");
 const CryptoKey = require("@trust/webcrypto/src/keys/CryptoKey.js");
-const crypto = new Crypto();
+const crypto = require("@trust/webcrypto");
 
 const {
   ReadableStream,
