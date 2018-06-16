@@ -56,8 +56,8 @@ class BodyImpl {
   // PRIVATE METHODS
   // ---------------
 
-  initBody(source, headers) {
-    const { content, mimeType, totalBytes } = this.extractContent(source);
+  initBody(input, headers) {
+    const { content, mimeType, totalBytes } = this.extractContent(input);
 
     // meh...
     this[INTERNALS] = {
@@ -81,7 +81,7 @@ class BodyImpl {
         const stream = new PassThrough();
         stream.end(content);
         const body = readableStreamFromNode(stream);
-        Object.assign(this[INTERNALS], { body, source });
+        Object.assign(this[INTERNALS], { body, source: input });
       }
     }
 
@@ -186,8 +186,8 @@ class BodyImpl {
   }
   */
 
-  extractContent(source) {
-    if (source == null) {
+  extractContent(input) {
+    if (input == null) {
       return {
         content: null,
         mimeType: null,
@@ -195,36 +195,36 @@ class BodyImpl {
       };
     }
 
-    if (Blob.isImpl(source)) {
+    if (Blob.isImpl(input)) {
       return {
-        content: source._buffer,
-        mimeType: source.type,
-        totalBytes: source.size
+        content: input._buffer,
+        mimeType: input.type,
+        totalBytes: input.size
       };
     }
 
-    if (source instanceof ArrayBuffer) {
+    if (input instanceof ArrayBuffer) {
       return {
-        content: Buffer.from(source),
+        content: Buffer.from(input),
         mimeType: null,
-        totalBytes: source.byteLength
+        totalBytes: input.byteLength
       };
     }
 
-    if (ArrayBuffer.isView(source)) {
+    if (ArrayBuffer.isView(input)) {
       return {
-        content: Buffer.from(source, source.byteOffset, source.byteLength),
+        content: Buffer.from(input, input.byteOffset, input.byteLength),
         mimeType: null,
-        totalBytes: source.byteLength
+        totalBytes: input.byteLength
       };
     }
 
-    if (FormData.isImpl(source)) {
+    if (FormData.isImpl(input)) {
       // ("multipart/form-data; boundary=----TODO");
       throw Error("not implemented");
     }
 
-    if (source instanceof URLSearchParams) {
+    if (input instanceof URLSearchParams) {
       const buffer = Buffer.from(String(body));
       return {
         content: buffer,
@@ -233,16 +233,16 @@ class BodyImpl {
       };
     }
 
-    if (source instanceof ReadableStream) {
+    if (input instanceof ReadableStream) {
       return {
-        content: source,
+        content: input,
         mimeType: null,
         totalBytes: null
       };
     }
 
-    if (typeof source === "string") {
-      const buffer = Buffer.from(source);
+    if (typeof input === "string") {
+      const buffer = Buffer.from(input);
       return {
         content: buffer,
         mimeType: "text/plain;charset=UTF-8",
@@ -250,11 +250,11 @@ class BodyImpl {
       };
     }
 
-    throw Error("Unrecognized type", source);
+    throw Error("Unrecognized type", input);
 
     // NOTE: Sorry, we're not dealing with node streams anymore.
     // // istanbul ignore if: should never happen
-    // if (!(source instanceof Stream)) {
+    // if (!(input instanceof Stream)) {
     //   return Buffer.alloc(0);
     // }
     //
@@ -284,7 +284,7 @@ class BodyImpl {
     //
     //   this[INTERNALS].rejectCurrentPromise = reject;
     //
-    //   source.on("data", chunk => {
+    //   input.on("data", chunk => {
     //     if (abort || chunk === null) {
     //       return;
     //     }
@@ -309,7 +309,7 @@ class BodyImpl {
     //     accum.push(chunk);
     //   });
     //
-    //   source.once("end", () => {
+    //   input.once("end", () => {
     //     if (abort) {
     //       return;
     //     }
