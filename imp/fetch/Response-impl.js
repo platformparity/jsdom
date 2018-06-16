@@ -13,7 +13,7 @@ const INTERNALS = Symbol("Response internals");
 class ResponseImpl {
   constructor([body, init]) {
     // FIXME: side effects in "constructor"
-    const contentType = this.bodyConstructor([body]);
+    const contentType = this.initBody(body);
 
     const status = init.status || 200;
 
@@ -56,13 +56,12 @@ class ResponseImpl {
     const res = Response.createImpl([
       this.cloneBody(),
       {
+        url: this.url,
         status: this.status,
         statusText: this.statusText,
         headers: this.headers
       }
     ]);
-
-    res[INTERNALS].url = this.url;
 
     return res;
   }

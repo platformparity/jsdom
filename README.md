@@ -93,10 +93,10 @@ There's actually work to be done to alternate between polyfills and native impls
 
 #### Fetch API
 
-- [ ] `Response`
-- [ ] `Request`
+- [x] `Response`
+- [x] `Request`
 - [x] `Headers`
-- [ ] `fetch` (minus Streams API stuff and `formData()`; no static methods)
+- [x] `fetch` (`formData()` not implemented; no static methods; various getters missing; bugs)
 
 #### Form data (part of XHR stuff...)
 
@@ -153,6 +153,8 @@ Could implement on top of IndexedDB or just write response bodies to the file sy
 
 Could instead be implemented with a `node` prefix...
 
+- [ ] `TEMPORARY`
+- [ ] `PERSISTENT`
 - [ ] `webkitRequestFileSystem`
 - [ ] ~~`webkitRequestFileSystemSync`~~
 - [ ] `webkitResolveLocalFileSystemURL`
@@ -180,8 +182,6 @@ Actually part of the Worker API, I think. Investigate.
 
 #### Weird shit
 
-- [ ] `TEMPORARY`
-- [ ] `PERSISTENT`
 - [ ] `PushSubscriptionOptions`
 - [ ] `PushSubscription`
 - [ ] `PushManager`
@@ -224,6 +224,5 @@ Couple of notes:
 - Having an `IndexedDB` implementation for close-enough persistence needs right inside of node would be awesome, but that would be a considerable undertaking and I'm not sure I'd release that under MIT. There's in-memory IndexedDB implementations though, could try to plug that one in.
 - Not clear what to do about the Cache API
 - Probably going to drop the `DedicatedWorkerGlobalContext` stuff. Makes no sense here, does it?
-  - On second thought, maybe that `postMessage` stuff could be repurposed to use some messaging protocol under the hood. Sounds a bit _too_ clever though...
 - I've crossed out a couple of things I don't want to support at this point.
 - I haven't look at some of these _at all_. They probably don't make a lot of sense either

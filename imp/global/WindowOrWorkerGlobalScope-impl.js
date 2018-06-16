@@ -4,7 +4,7 @@ const { mixin } = require("../utils.js");
 const { atob, btoa } = require("abab");
 
 // FIXME: naming of partial interface mixins..
-const fetch_PartialWindowOrWorkerGlobalScopeImpl = require("../fetch/WindowOrWorkerGlobalScope-impl.js")
+const FetchWindowOrWorkerGlobalScopeImpl = require("../fetch/WindowOrWorkerGlobalScope-impl.js")
   .implementation;
 
 class WindowOrWorkerGlobalScopeImpl {
@@ -47,7 +47,7 @@ Object.assign(WindowOrWorkerGlobalScopeImpl.prototype, {
 
 mixin(
   WindowOrWorkerGlobalScopeImpl.prototype,
-  fetch_PartialWindowOrWorkerGlobalScopeImpl.prototype
+  FetchWindowOrWorkerGlobalScopeImpl.prototype
 );
 
 exports.implementation = WindowOrWorkerGlobalScopeImpl;

@@ -18,7 +18,7 @@ const {
   writableStreamFromNode
 } = require("@platformparity/streams");
 
-class PartialWindowOrWorkerGlobalScopeImpl {
+class FetchWindowOrWorkerGlobalScopeImpl {
   fetch(input, init) {
     // wrap http.request into fetch
     return new Promise((resolve, reject) => {
@@ -41,7 +41,7 @@ class PartialWindowOrWorkerGlobalScopeImpl {
       // send request
       const req = send(options);
       let reqTimeout;
-      let body;
+      let body; // FIXME
 
       function abortCallback() {
         const error = new Error(
@@ -95,7 +95,7 @@ class PartialWindowOrWorkerGlobalScopeImpl {
         const headers = HeadersImpl.createHeadersLenient(res.headers);
 
         // HTTP fetch step 5
-        if (PartialWindowOrWorkerGlobalScopeImpl.isRedirect(res.statusCode)) {
+        if (this.isRedirect(res.statusCode)) {
           // HTTP fetch step 5.2
           const location = headers.get("Location");
 
@@ -154,7 +154,7 @@ class PartialWindowOrWorkerGlobalScopeImpl {
               if (
                 res.statusCode !== 303 &&
                 request.body &&
-                request.getTotalBytes() === null
+                request.totalBytes === null
               ) {
                 reject(
                   new Error(
@@ -187,6 +187,7 @@ class PartialWindowOrWorkerGlobalScopeImpl {
         // prepare response
         res.on("error", errorHandler);
 
+        // TODO: is this necesary?
         body = res.pipe(new PassThrough());
 
         const responseOptions = {
@@ -194,8 +195,8 @@ class PartialWindowOrWorkerGlobalScopeImpl {
           status: res.statusCode,
           statusText: res.statusMessage,
           headers
-          // size: request.size,
-          // timeout: request.timeout
+          // size: request.nodeMaxChunkSize,
+          // timeout: request.nodeTimeout
         };
 
         // HTTP-network fetch step 12.1.1.3
@@ -219,51 +220,49 @@ class PartialWindowOrWorkerGlobalScopeImpl {
           resolve(
             Response.create([readableStreamFromNode(body), responseOptions])
           );
-          return;
         }
 
-        // For Node v6+
-        // Be less strict when decoding compressed responses, since sometimes
-        // servers send slightly invalid responses that are still accepted
-        // by common browsers.
-        // Always using Z_SYNC_FLUSH is what cURL does.
-        const zlibOptions = {
-          flush: zlib.Z_SYNC_FLUSH,
-          finishFlush: zlib.Z_SYNC_FLUSH
-        };
-
         // for gzip
-        if (codings == "gzip" || codings == "x-gzip") {
+        else if (codings == "gzip" || codings == "x-gzip") {
+          // For Node v6+
+          // Be less strict when decoding compressed responses, since sometimes
+          // servers send slightly invalid responses that are still accepted
+          // by common browsers.
+          // Always using Z_SYNC_FLUSH is what cURL does.
+          const zlibOptions = {
+            flush: zlib.Z_SYNC_FLUSH,
+            finishFlush: zlib.Z_SYNC_FLUSH
+          };
+
           body = body.pipe(zlib.createGunzip(zlibOptions));
           resolve(
             Response.create([readableStreamFromNode(body), responseOptions])
           );
-          return;
         }
 
         // for deflate
-        if (codings == "deflate" || codings == "x-deflate") {
+        else if (codings == "deflate" || codings == "x-deflate") {
           // handle the infamous raw deflate response from old servers
           // a hack for old IIS and Apache servers
           const raw = res.pipe(new PassThrough());
           raw.once("data", chunk => {
             // see http://stackoverflow.com/questions/37519828
-            if ((chunk[0] & 0x0f) === 0x08) {
-              body = body.pipe(zlib.createInflate());
-            } else {
-              body = body.pipe(zlib.createInflateRaw());
-            }
+            body =
+              (chunk[0] & 0x0f) === 0x08
+                ? body.pipe(zlib.createInflate())
+                : body.pipe(zlib.createInflateRaw());
             resolve(
               Response.create([readableStreamFromNode(body), responseOptions])
             );
           });
-          return;
         }
 
         // otherwise, use response as-is
-        resolve(
-          Response.create([readableStreamFromNode(body), responseOptions])
-        );
+        else {
+          resolve(
+            Response.create([readableStreamFromNode(body), responseOptions])
+          );
+        }
       });
 
       request.body.pipeTo(writableStreamFromNode(req));
@@ -273,7 +272,7 @@ class PartialWindowOrWorkerGlobalScopeImpl {
   // PRIVATE METHODS
   // ---------------
 
-  static isRedirect(code) {
+  isRedirect(code) {
     return (
       code === 301 ||
       code === 302 ||
@@ -284,4 +283,4 @@ class PartialWindowOrWorkerGlobalScopeImpl {
   }
 }
 
-exports.implementation = PartialWindowOrWorkerGlobalScopeImpl;
+exports.implementation = FetchWindowOrWorkerGlobalScopeImpl;

@@ -26,11 +26,11 @@ class RequestImpl {
       (init.body != null || (Request.isImpl(input) && input.body !== null)) &&
       (method === "GET" || method === "HEAD")
     ) {
-      throw new TypeError(" Request with GET/HEAD method cannot have body.");
+      throw new TypeError("Request with GET/HEAD method cannot have body.");
     }
 
     // FIXME: does this make sense? spec?
-    const inputBody =
+    const body =
       init.body != null
         ? init.body
         : Request.isImpl(input) && input.body !== null
@@ -38,7 +38,7 @@ class RequestImpl {
           : null;
 
     // FIXME: side effects in "constructor"
-    const contentType = this.bodyConstructor([inputBody]);
+    const contentType = this.initBody(body);
 
     const headers = Headers.createImpl([init.headers || input.headers || {}]);
     if (init.body != null) {
@@ -133,12 +133,6 @@ class RequestImpl {
   // PRIVATE METHODS
   // ---------------
 
-  /**
-   * Convert a Request to Node.js http request options.
-   *
-   * @param   Request  A Request instance
-   * @return  Object   The options object to be passed to http.request
-   */
   getNodeRequestOptions() {
     const parsedURL = this[INTERNALS].parsedURL;
     const headers = Headers.createImpl([this[INTERNALS].headers]);
@@ -163,7 +157,7 @@ class RequestImpl {
       contentLengthValue = "0";
     }
     if (this.body != null) {
-      const totalBytes = this.getTotalBytes();
+      const totalBytes = this.totalBytes;
       if (typeof totalBytes === "number") {
         contentLengthValue = String(totalBytes);
       }

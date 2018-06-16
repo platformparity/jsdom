@@ -28,7 +28,6 @@ class BodyImpl {
     return this[INTERNALS].body._disturbed;
   }
 
-  // FIXME: pass "method" rather than chain, similar to spec..
   arrayBuffer() {
     return this.consumeBody().then(buf =>
       buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength)
@@ -57,17 +56,18 @@ class BodyImpl {
   // PRIVATE METHODS
   // ---------------
 
-  bodyConstructor([source]) {
-    const [content, contentType, totalBytes] = this.extractContent(source);
+  initBody(source) {
+    const [content, mimeType, totalBytes] = this.extractContent(source);
 
     // meh...
     this[INTERNALS] = {
-      transmittedBytes: 0,
-      totalBytes
+      mimeType,
+      totalBytes,
+      transmittedBytes: 0
     };
 
     if (content instanceof ReadableStream) {
-      // FIXME: If keepalive flag is set and object’s type is a ReadableStream object,
+      // TODO: If keepalive flag is set and object’s type is a ReadableStream object,
       // then throw a TypeError.
       Object.assign(this[INTERNALS], { body: content, source: null });
     } else {
@@ -77,10 +77,6 @@ class BodyImpl {
       Object.assign(this[INTERNALS], { body, source });
     }
 
-    // TODO: assume headers is present, and set directly?
-    return contentType;
-
-    // NOTE: Sorry, we're not dealing with node streams anymore.
     /*
     this.nodeMaxChunkSize = nodeMaxChunkSize;
     this.nodeTimeout = nodeTimeout;
@@ -129,23 +125,10 @@ class BodyImpl {
     }
 
     return this.readAllBytes(reader);
-
-    /*
-    if (this[INTERNALS].disturbed) {
-      return Promise.reject(new TypeError(`body stream already read`));
-    }
-
-    this[INTERNALS].disturbed = true;
-
-    if (this[INTERNALS].error) {
-      return Promise.reject(this[INTERNALS].error);
-    }
-
-    return Promise.resolve(null);
-    */
   }
 
   // https://fetch.spec.whatwg.org/#concept-read-all-bytes-from-readablestream
+  /*
   async readAllBytes(reader) {
     const bytes = [];
     while (true) {
@@ -159,9 +142,21 @@ class BodyImpl {
       }
     }
   }
+  */
 
   /*
-  function readAllBytes(reader) {
+  async readAllBytes(reader) {
+    const bytes = [];
+    // FIXME: reader doesn't implement async iterable ?
+    for await (const chunk of reader) {
+      if (chunk instanceof Uint8Array) bytes.push(chunk);
+      else throw new TypeError("chunk not type of Uint8Array");
+    }
+    return Buffer.concat(bytes);
+  }
+  */
+
+  readAllBytes(reader) {
     const bytes = [];
 
     return pump();
@@ -170,18 +165,18 @@ class BodyImpl {
       return reader.read().then(({ value, done }) => {
         if (done === false && value instanceof Uint8Array) {
           bytes.push(value);
-          return pump(); // TODO: call stack size?
+          return pump(); // FIXME: maximum call stack size?
         } else if (done === true) {
           return Buffer.concat(bytes);
         } else {
-          throw new TypeError("not done and value not type of Uint8Array");
+          return Promise.reject(
+            new TypeError("not done and value not type of Uint8Array")
+          );
         }
       });
     }
   }
-  */
 
-  // FIXME: rename
   extractContent(source) {
     if (source === null) {
       return [Buffer.alloc(0), null, 0];
@@ -226,7 +221,7 @@ class BodyImpl {
       return [buffer, "text/plain;charset=UTF-8", buffer.byteLength];
     }
 
-    throw Error("this should never happen");
+    throw Error("Unrecognized type");
 
     // NOTE: Sorry, we're not dealing with node streams anymore.
     // // istanbul ignore if: should never happen
@@ -310,6 +305,7 @@ class BodyImpl {
     // });
   }
 
+  // http://www.w3.org/TR/2011/WD-html5-20110113/parsing.html#determining-the-character-encoding
   detectBufferEncoding(buffer) {
     const ct = this.headers.get("content-type");
     let charset = "utf-8";
@@ -358,25 +354,12 @@ class BodyImpl {
     return charset;
   }
 
-  /**
-   * Detect buffer encoding and convert to target encoding
-   * ref: http://www.w3.org/TR/2011/WD-html5-20110113/parsing.html#determining-the-character-encoding
-   *
-   * @param   Buffer  buffer    Incoming buffer
-   * @return  String
-   */
   convertBody(buffer) {
     const charset = this.detectBufferEncoding(buffer);
     // turn raw buffers into a single utf-8 buffer
     return convert(buffer, "UTF-8", charset).toString();
   }
 
-  /**
-   * Clone body given Res/Req instance
-   *
-   * @param   Mixed  instance  Response or Request instance
-   * @return  Mixed
-   */
   cloneBody() {
     try {
       const [out1, out2] = this.body.tee();
@@ -392,36 +375,16 @@ class BodyImpl {
       return out2;
     } catch (e) {
       // FIXME: ???
-      throw new Error("cannot clone body after it is used");
+      throw new TypeError("cannot clone body after it is used");
     }
-
-    // if (bodyUsed) {
-    // }
-    // // check that body is a stream and not form-data object
-    // // FIXME: we can't clone the form-data object without having it as a dependency
-    // if (body instanceof Stream && typeof body.getBoundary !== "function") {
-    //   // tee instance body
-    //   const p1 = new PassThrough();
-    //   const p2 = new PassThrough();
-    //   body.pipe(p1);
-    //   body.pipe(p2);
-    //   // set instance body to teed body and return the other teed body
-    //   this[INTERNALS].body = p1;
-    //   return p2;
-    // }
-    // return body;
   }
 
-  /**
-   * The Fetch Standard treats this as if "total bytes" is a property on the body.
-   * For us, we have to explicitly get it with a function.
-   *
-   * ref: https://fetch.spec.whatwg.org/#concept-body-total-bytes
-   *
-   * @return  Number?            Number of bytes, or null if not possible
-   */
-  getTotalBytes() {
-    // FIXME: not copies by clone...
+  get mimeType() {
+    return this[INTERNALS].mimeType;
+  }
+
+  get totalBytes() {
+    // FIXME: not copied by clone...
     return this[INTERNALS].totalBytes;
   }
 }
