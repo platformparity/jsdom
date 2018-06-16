@@ -12,24 +12,15 @@ const INTERNALS = Symbol("Response internals");
 
 class ResponseImpl {
   constructor([body, init]) {
-    // FIXME: side effects in "constructor"
-    const contentType = this.initBody(body);
-
-    const status = init.status || 200;
-
     const headers = Headers.createImpl([init.headers]);
-    if (body != null) {
-      if (contentType !== null && !headers.has("Content-Type")) {
-        headers.append("Content-Type", contentType);
-      }
-    }
 
-    this[INTERNALS] = {
-      url: init.url || "",
-      status,
-      statusText: init.statusText || STATUS_CODES[status],
-      headers
-    };
+    this.initBody(body, headers);
+
+    const url = init.url || "";
+    const status = init.status || 200;
+    const statusText = init.statusText || STATUS_CODES[status];
+
+    this[INTERNALS] = { url, status, statusText, headers };
   }
 
   get url() {
@@ -53,17 +44,13 @@ class ResponseImpl {
   }
 
   clone() {
-    const res = Response.createImpl([
-      this.cloneBody(),
-      {
-        url: this.url,
-        status: this.status,
-        statusText: this.statusText,
-        headers: this.headers
-      }
+    const { url, status, statusText, headers } = this;
+    const that = Response.createImpl([
+      null,
+      { url, status, statusText, headers }
     ]);
-
-    return res;
+    this.cloneBodyTo(that);
+    return that;
   }
 }
 

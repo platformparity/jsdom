@@ -24,7 +24,6 @@ class BodyImpl {
   }
 
   get bodyUsed() {
-    // return this[INTERNALS].disturbed;
     return this[INTERNALS].body._disturbed;
   }
 
@@ -35,8 +34,9 @@ class BodyImpl {
   }
 
   blob() {
-    const type = (this.headers && this.headers.get("content-type")) || "";
-    return this.consumeBody().then(buf => Blob.create([[buf], { type }]));
+    return this.consumeBody().then(buf =>
+      Blob.create([[buf], { type: this.mimeType }])
+    );
   }
 
   formData() {
@@ -56,25 +56,33 @@ class BodyImpl {
   // PRIVATE METHODS
   // ---------------
 
-  initBody(source) {
-    const [content, mimeType, totalBytes] = this.extractContent(source);
+  initBody(source, headers) {
+    const { content, mimeType, totalBytes } = this.extractContent(source);
 
     // meh...
     this[INTERNALS] = {
+      source: null,
+      body: null,
       mimeType,
       totalBytes,
-      transmittedBytes: 0
+      transmittedBytes: 0 // FIXME: not actually being used
     };
 
-    if (content instanceof ReadableStream) {
-      // TODO: If keepalive flag is set and object’s type is a ReadableStream object,
-      // then throw a TypeError.
-      Object.assign(this[INTERNALS], { body: content, source: null });
-    } else {
-      const stream = new PassThrough();
-      stream.end(content);
-      const body = readableStreamFromNode(stream);
-      Object.assign(this[INTERNALS], { body, source });
+    if (mimeType !== null && !headers.has("Content-Type")) {
+      headers.append("Content-Type", mimeType); // FIXME: why append?
+    }
+
+    if (content != null) {
+      if (content instanceof ReadableStream) {
+        // TODO: If keepalive flag is set and object’s type is a ReadableStream object,
+        // then throw a TypeError.
+        this[INTERNALS].body = content;
+      } else {
+        const stream = new PassThrough();
+        stream.end(content);
+        const body = readableStreamFromNode(stream);
+        Object.assign(this[INTERNALS], { body, source });
+      }
     }
 
     /*
@@ -109,10 +117,11 @@ class BodyImpl {
 
   // https://fetch.spec.whatwg.org/#concept-body-consume-body
   consumeBody() {
+    // FIXME: same error as browser impls?
     if (this.body.locked) {
-      return Promise.reject(new TypeError("body stream locked")); // FIXME: same error as browser impls?
+      return Promise.reject(new TypeError("body stream locked"));
     } else if (this.body._disturbed) {
-      return Promise.reject(new TypeError("body stream already read")); // FIXME: same error as brower?
+      return Promise.reject(new TypeError("body stream already read"));
     }
 
     const stream = this.body || new ReadableStream();
@@ -128,7 +137,6 @@ class BodyImpl {
   }
 
   // https://fetch.spec.whatwg.org/#concept-read-all-bytes-from-readablestream
-  /*
   async readAllBytes(reader) {
     const bytes = [];
     while (true) {
@@ -142,7 +150,6 @@ class BodyImpl {
       }
     }
   }
-  */
 
   /*
   async readAllBytes(reader) {
@@ -156,6 +163,7 @@ class BodyImpl {
   }
   */
 
+  /*
   readAllBytes(reader) {
     const bytes = [];
 
@@ -176,26 +184,39 @@ class BodyImpl {
       });
     }
   }
+  */
 
   extractContent(source) {
-    if (source === null) {
-      return [Buffer.alloc(0), null, 0];
+    if (source == null) {
+      return {
+        content: null,
+        mimeType: null,
+        totalBytes: 0
+      };
     }
 
     if (Blob.isImpl(source)) {
-      return [source._buffer, source.type, source.size];
+      return {
+        content: source._buffer,
+        mimeType: source.type,
+        totalBytes: source.size
+      };
     }
 
     if (source instanceof ArrayBuffer) {
-      return [Buffer.from(source), null, source.byteLength];
+      return {
+        content: Buffer.from(source),
+        mimeType: null,
+        totalBytes: source.byteLength
+      };
     }
 
     if (ArrayBuffer.isView(source)) {
-      return [
-        Buffer.from(source, source.byteOffset, source.byteLength),
-        null,
-        source.byteLength
-      ];
+      return {
+        content: Buffer.from(source, source.byteOffset, source.byteLength),
+        mimeType: null,
+        totalBytes: source.byteLength
+      };
     }
 
     if (FormData.isImpl(source)) {
@@ -205,23 +226,31 @@ class BodyImpl {
 
     if (source instanceof URLSearchParams) {
       const buffer = Buffer.from(String(body));
-      return [
-        buffer,
-        "application/x-www-form-urlencoded;charset=UTF-8",
-        buffer.byteLength
-      ];
+      return {
+        content: buffer,
+        mimeType: "application/x-www-form-urlencoded;charset=UTF-8",
+        totalBytes: buffer.byteLength
+      };
     }
 
     if (source instanceof ReadableStream) {
-      return [source, null, null];
+      return {
+        content: source,
+        mimeType: null,
+        totalBytes: null
+      };
     }
 
     if (typeof source === "string") {
       const buffer = Buffer.from(source);
-      return [buffer, "text/plain;charset=UTF-8", buffer.byteLength];
+      return {
+        content: buffer,
+        mimeType: "text/plain;charset=UTF-8",
+        totalBytes: buffer.byteLength
+      };
     }
 
-    throw Error("Unrecognized type");
+    throw Error("Unrecognized type", source);
 
     // NOTE: Sorry, we're not dealing with node streams anymore.
     // // istanbul ignore if: should never happen
@@ -305,6 +334,7 @@ class BodyImpl {
     // });
   }
 
+  // TODO: this doesn't belong here
   // http://www.w3.org/TR/2011/WD-html5-20110113/parsing.html#determining-the-character-encoding
   detectBufferEncoding(buffer) {
     const ct = this.headers.get("content-type");
@@ -354,28 +384,29 @@ class BodyImpl {
     return charset;
   }
 
+  // TODO: does this belong here?
   convertBody(buffer) {
     const charset = this.detectBufferEncoding(buffer);
     // turn raw buffers into a single utf-8 buffer
     return convert(buffer, "UTF-8", charset).toString();
   }
 
-  cloneBody() {
-    try {
-      const [out1, out2] = this.body.tee();
+  cloneBodyTo(that) {
+    that[INTERNALS] = {};
 
-      // const that = {};
-      // for (const prop in this[INTERNALS]) {
-      //   that[INTERNALS][prop] = this[INTERNALS][prop];
-      // }
+    for (const prop in this[INTERNALS]) {
+      that[INTERNALS][prop] = this[INTERNALS][prop];
+    }
 
-      this[INTERNALS].body = out1;
-      // that[INTERNALS].body = out2;
+    if (this.body != null) {
+      try {
+        const [out1, out2] = this.body.tee();
 
-      return out2;
-    } catch (e) {
-      // FIXME: ???
-      throw new TypeError("cannot clone body after it is used");
+        this[INTERNALS].body = out1;
+        that[INTERNALS].body = out2;
+      } catch (e) {
+        throw new TypeError("cannot clone body after it is used");
+      }
     }
   }
 
@@ -384,8 +415,11 @@ class BodyImpl {
   }
 
   get totalBytes() {
-    // FIXME: not copied by clone...
     return this[INTERNALS].totalBytes;
+  }
+
+  get transmittedBytes() {
+    return this[INTERNALS].transmittedBytes;
   }
 }
 

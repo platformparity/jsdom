@@ -22,30 +22,15 @@ class RequestImpl {
 
     const method = (init.method || input.method || "GET").toUpperCase();
 
-    if (
-      (init.body != null || (Request.isImpl(input) && input.body !== null)) &&
-      (method === "GET" || method === "HEAD")
-    ) {
+    if (init.body != null && (method === "GET" || method === "HEAD")) {
       throw new TypeError("Request with GET/HEAD method cannot have body.");
     }
 
-    // FIXME: does this make sense? spec?
-    const body =
-      init.body != null
-        ? init.body
-        : Request.isImpl(input) && input.body !== null
-          ? input.cloneBody()
-          : null;
-
-    // FIXME: side effects in "constructor"
-    const contentType = this.initBody(body);
-
     const headers = Headers.createImpl([init.headers || input.headers || {}]);
-    if (init.body != null) {
-      if (contentType !== null && !headers.has("Content-Type")) {
-        headers.append("Content-Type", contentType);
-      }
-    }
+
+    this.initBody(init.body, headers);
+
+    if (Request.isImpl(input)) input.cloneBodyTo(this);
 
     const abortController = AbortController.createImpl([]);
     if (signal) {
