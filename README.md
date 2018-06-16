@@ -1,5 +1,7 @@
 # Platform Parity
 
+Making backend development fun for frontend developers.
+
 ## Status
 
 Below is a print-out of everything that's available in a `Worker` in Chrome (67). The goal of the platform parity project is to provide a reasonable implementation to all of these in node. Plenty won't have a reasonable implementation though. These should either be undefined or throw upon invocation (not sure which is better).
@@ -98,7 +100,7 @@ There's actually work to be done to alternate between polyfills and native impls
 - [x] `Headers`
 - [x] `fetch` (`formData()` not implemented; no static methods; various getters missing; bugs)
 
-#### Form data (part of XHR stuff...)
+#### Form data (part of XHR)
 
 - [x] `FormData`
 
@@ -188,7 +190,7 @@ Actually part of the Worker API, I think. Investigate.
 - [ ] `PermissionStatus`
 - [ ] `Permissions`
 - [ ] `Notification`
-- [ ] `BudgetService`
+- [ ] ~~`BudgetService`~~
 - [ ] `PerformanceServerTiming`
 - [ ] `SyncManager`
 - [ ] `NetworkInformation`
@@ -204,6 +206,8 @@ Actually part of the Worker API, I think. Investigate.
 
 These are not on the global object, but `global.navigator`:
 
+Note that some results depend on the content of env variables `PROTOCOL`, `HOSTNAME`, and `PORT`, and default to `http:`, `os.hostname() || 'localhost'`, and `3000`.
+
 - [x] `hardwareConcurrency`
 - [x] `appCodeName`
 - [x] `appName`
@@ -213,7 +217,7 @@ These are not on the global object, but `global.navigator`:
 - [x] `userAgent`
 - [x] `onLine`
 - [ ] `connection`
-- [ ] `budget`
+- [ ] ~~`budget`~~
 - [ ] `permissions`
 - [ ] `deviceMemory`
 - [ ] `storage`
