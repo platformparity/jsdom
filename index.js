@@ -1,3 +1,5 @@
+"use strict";
+
 const globalContext = require("./library.js");
 
 // HACK

@@ -29,6 +29,7 @@ function addDir(dir) {
 }
 
 addDir("abort-controller");
+addDir("encoding");
 addDir("event-target");
 addDir("events");
 addDir("file");

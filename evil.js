@@ -1,3 +1,5 @@
+"use strict";
+
 require("./index.js");
 
 // TODO: go the opposite route and delete everything that's not whitelisted?

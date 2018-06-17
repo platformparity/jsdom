@@ -34,7 +34,6 @@ module.exports = bindFunctions(globalContext);
 
 // Patching a bunch of things manually..
 const DOMException = require("domexception");
-const { TextEncoder, TextDecoder } = require("text-encoding");
 
 const Crypto = require("@trust/webcrypto/src/Crypto.js");
 const SubtleCrypto = require("@trust/webcrypto/src/SubtleCrypto.js");
@@ -53,8 +52,6 @@ const {
 
 Object.assign(module.exports, {
   DOMException,
-  TextEncoder,
-  TextDecoder,
   Crypto,
   SubtleCrypto,
   CryptoKey,
