@@ -13,11 +13,7 @@ const { format: formatURL, parse: parseURL } = require("url");
 const INTERNALS = Symbol("Response internals");
 
 class ResponseImpl {
-  constructor([body, init]) {
-    if (!this.isValidStatus(init.status)) {
-      throw new RangeError("Status must be between 200 and 599");
-    }
-
+  constructor([body, init = {}]) {
     const headers = Headers.createImpl([init.headers]);
 
     this.initBody(body, headers);
@@ -26,14 +22,31 @@ class ResponseImpl {
     const status = init.status || 200;
     const statusText = init.statusText || STATUS_CODES[status];
 
+    if (!this.isValidStatus(status)) {
+      throw new RangeError("Status must be between 200 and 599");
+    }
+
     if (body != null && this.isNullBodyStatus(init.status)) {
       throw new TypeError("Response cannot have a body with the given status");
     }
 
-    this[INTERNALS] = { url, status, statusText, headers };
+    this[INTERNALS] = {
+      url,
+      status,
+      statusText,
+      headers,
+      type: "default"
+    };
   }
 
-  static error() {}
+  static error() {
+    const e = Response.createImpl([]);
+    e[INTERNALS].url = "";
+    e[INTERNALS].status = 0;
+    e[INTERNALS].statusText = "";
+    e[INTERNALS].type = "error";
+    return e;
+  }
 
   static redirect(url, status) {
     // TODO: "current settings object’s API base URL"?
@@ -51,33 +64,40 @@ class ResponseImpl {
     return Response.createImpl([null, { url, status, headers }]);
   }
 
+  get type() {
+    return this[INTERNALS].type;
+  }
+
   get url() {
     return this[INTERNALS].url;
   }
-
+  get redirected() {
+    // FIXME
+    throw new Error("not implemented");
+  }
   get status() {
     return this[INTERNALS].status;
   }
-
   get ok() {
     return this[INTERNALS].status >= 200 && this[INTERNALS].status < 300;
   }
-
   get statusText() {
     return this[INTERNALS].statusText;
   }
-
   get headers() {
     return this[INTERNALS].headers;
   }
+  get trailer() {
+    // FIXME
+    throw Error("not implemented");
+  }
 
   clone() {
-    const { url, status, statusText, headers } = this;
-    const that = Response.createImpl([
-      null,
-      { url, status, statusText, headers }
-    ]);
+    const that = Response.createImpl([]);
     this.cloneBodyTo(that);
+    for (const prop in this[INTERNALS]) {
+      that[INTERNALS][prop] = this[INTERNALS][prop];
+    }
     return that;
   }
 
