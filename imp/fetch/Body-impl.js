@@ -1,5 +1,7 @@
 "use strict";
 
+const { randomString } = require("../utils.js");
+
 const Blob = require("../../lib/Blob.js");
 const FormData = require("../../lib/FormData.js");
 const File = require("../../lib/File.js");
@@ -17,24 +19,10 @@ const {
 
 const Busboy = require("busboy");
 
-const crypto = require("@trust/webcrypto");
-
 const convert = require("encoding").convert;
 
 // TODO: don't bother with the symbol, since impl class isn't exposed anyway
 const INTERNALS = Symbol("Body internals");
-
-// NOTE: `n` MUST NOT be greater than 32768.
-// NOTE: `allowedChars` MUST NOT exceed 65535 chars.
-function randomString(
-  n,
-  allowedChars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-) {
-  const { length } = allowedChars;
-  const random = crypto.getRandomValues(new Uint16Array(n));
-  const scaled = random.map(x => (x / 65536) * length);
-  return Array.prototype.map.call(scaled, x => allowedChars.charAt(x)).join("");
-}
 
 class BodyImpl {
   get body() {
@@ -57,82 +45,11 @@ class BodyImpl {
     );
   }
 
-  // TODO: This is not actually how the spec defines this.
-  // The method should consume the body first, then perform the algorithm.
-  // However, since we have the handy `busboy` library that works on a stream,
-  // we just pipe the body into it for now.
-  multiPartFormData() {
-    // TODO: same error as browser impls?
-    // FIXME: DRY
-    if (this.body.locked) {
-      return Promise.reject(new TypeError("body stream locked"));
-    } else if (this.body._disturbed) {
-      return Promise.reject(new TypeError("body stream already read"));
-    }
-
-    return new Promise((res, rej) => {
-      const formData = FormData.createImpl([]);
-
-      const busboy = new Busboy({
-        headers: { "content-type": this.mimeType }
-      });
-
-      busboy.on("file", (fieldname, file, filename, encoding, type) => {
-        const chunks = [];
-
-        file.on("data", data => {
-          // TODO: convert to utf-8?
-          chunks.push(data);
-        });
-
-        file.on("end", () => {
-          const file = File.createImpl([chunks, filename, { type }]);
-          formData.append(fieldname, file);
-        });
-
-        // TODO: error? what does the spec say?
-      });
-
-      busboy.on("field", (
-        fieldname,
-        val
-        /*fieldnameTruncated, valTruncated, encoding, mimetype*/
-      ) => {
-        // TODO: deal with truncated!?
-        // TODO: convert to utf-8?
-        // TODO: what about all these other parameters?
-        formData.append(fieldname, val);
-      });
-
-      busboy.on("finish", () => {
-        res(formData);
-      });
-
-      // TODO: what does the spec say?
-      busboy.on("error", e => {
-        rej(e);
-      });
-
-      this.body.pipeTo(writableStreamFromNode(busboy));
-    });
-  }
-
   formData() {
     if (this.mimeType.startsWith("multipart/form-data")) {
       return this.multiPartFormData();
     } else if (this.mimeType.startsWith("application/x-www-form-urlencoded")) {
-      return this.consumeBody().then(buffer => {
-        let entries;
-        try {
-          entries = new URLSearchParams(buffer.toString());
-        } catch (e) {
-          throw new TypeError(e.message);
-        }
-
-        const formData = FormData.createImpl([]);
-        for (const [k, v] of entries) formData.append(k, v);
-        return formData;
-      });
+      return this.wwwFromURLEncoded();
     }
     throw new TypeError();
   }
@@ -473,6 +390,81 @@ class BodyImpl {
     chunks.push(Buffer.from(`--${boundary}--`), LINE_BREAK);
 
     return [Buffer.concat(chunks), boundary];
+  }
+
+  // TODO: This is not actually how the spec defines this.
+  // The method should consume the body first, then perform the algorithm.
+  // However, since we have the handy `busboy` library that works on a stream,
+  // we just pipe the body into it for now.
+  multiPartFormData() {
+    // TODO: same error as browser impls?
+    // FIXME: DRY
+    if (this.body.locked) {
+      return Promise.reject(new TypeError("body stream locked"));
+    } else if (this.body._disturbed) {
+      return Promise.reject(new TypeError("body stream already read"));
+    }
+
+    return new Promise((res, rej) => {
+      const formData = FormData.createImpl([]);
+
+      const busboy = new Busboy({
+        headers: { "content-type": this.mimeType }
+      });
+
+      busboy.on("file", (fieldname, file, filename, encoding, type) => {
+        const chunks = [];
+
+        file.on("data", data => {
+          // TODO: convert to utf-8?
+          chunks.push(data);
+        });
+
+        file.on("end", () => {
+          const file = File.createImpl([chunks, filename, { type }]);
+          formData.append(fieldname, file);
+        });
+
+        // TODO: error? what does the spec say?
+      });
+
+      busboy.on("field", (
+        fieldname,
+        val
+        /*fieldnameTruncated, valTruncated, encoding, mimetype*/
+      ) => {
+        // TODO: deal with truncated!?
+        // TODO: convert to utf-8?
+        // TODO: what about all these other parameters?
+        formData.append(fieldname, val);
+      });
+
+      busboy.on("finish", () => {
+        res(formData);
+      });
+
+      // TODO: what does the spec say?
+      busboy.on("error", e => {
+        rej(e);
+      });
+
+      this.body.pipeTo(writableStreamFromNode(busboy));
+    });
+  }
+
+  wwwFromURLEncoded() {
+    return this.consumeBody().then(buffer => {
+      let entries;
+      try {
+        entries = new URLSearchParams(buffer.toString());
+      } catch (e) {
+        throw new TypeError(e.message);
+      }
+
+      const formData = FormData.createImpl([]);
+      for (const [k, v] of entries) formData.append(k, v);
+      return formData;
+    });
   }
 
   // TODO: this doesn't belong here

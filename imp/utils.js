@@ -1,8 +1,27 @@
 "use strict";
 const path = require("path");
 const { serializeURL, parseURL } = require("whatwg-url");
+const { Buffer } = require("buffer");
 // const { domSymbolTree } = require("./helpers/internal-constants.js");
 // const { parseURLToResultingURLRecord } = require("./helpers/document-base-url.js");
+
+const crypto = require("@trust/webcrypto");
+// const { TextDecoder } = require("text-encoding");
+
+// NOTE: `n` MUST NOT be greater than 32768.
+// NOTE: `allowedChars` MUST NOT exceed 65535 chars.
+exports.randomString = function(
+  n,
+  allowedChars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+) {
+  const { length } = allowedChars;
+  const random = crypto.getRandomValues(new Uint16Array(n));
+  const charCodes = random.map(x =>
+    allowedChars.charCodeAt((x / 65536) * length)
+  );
+  // return new TextDecoder().decode(charCodes);
+  return Buffer.from(charCodes).toString();
+};
 
 exports.toFileUrl = function(fileName) {
   // Beyond just the `path.resolve`, this is mostly for the benefit of Windows,
