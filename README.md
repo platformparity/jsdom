@@ -95,10 +95,10 @@ There's actually work to be done to alternate between polyfills and native impls
 
 #### Fetch API
 
-- [x] `Response`
-- [x] `Request`
-- [x] `Headers`
-- [x] `fetch` (no static methods; various getters missing; bugs)
+- [x] `Response` (certain props missing)
+- [x] `Request` (certain props missing)
+- [x] `Headers` (guards not implemented. e.g. `immutable`)
+- [x] `fetch` (various getters missing; bugs)
 
 #### Form data (part of XHR)
 

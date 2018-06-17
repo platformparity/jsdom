@@ -21,7 +21,7 @@ This code is based on the `node-fetch` project, but has some important differenc
 - [x] Removed private function `this` hackery. Helper functions are now just methods on the implementation classes, which aren't exposed by the `webidl2js` wrapper.
 - [x] Expose Streams API streams instead of node streams
 - [x] Make body a stream always (spec!)
-- [ ] Implement `formData`
+- [x] Implement `formData`
 - [ ] Run web platform tests
 - [ ] Figure out what to do about properties like `referrer`, `referrerPolicy`, etc that don't have an obvious equivalent in node
 - [ ] Other `FIXME` and `TODO`s in the code
