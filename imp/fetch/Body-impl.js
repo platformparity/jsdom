@@ -243,7 +243,7 @@ class BodyImpl {
     }
 
     if (input instanceof URLSearchParams) {
-      const content = Buffer.from(String(body));
+      const content = Buffer.from(String(input));
       return {
         content,
         mimeType: "application/x-www-form-urlencoded;charset=UTF-8",
