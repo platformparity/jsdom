@@ -40,5 +40,17 @@
     "build": "mkdir -p lib && node ./scripts/convert.js",
     "preversion": "npm run format && git add .",
     "prepare": "npm run build"
-  }
+  },
+  "directories": {
+    "lib": "lib"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/platformparity/platformparity.git"
+  },
+  "author": "Florian Klampfer <mail@qwtel.com> (https://qwtel.com/)",
+  "bugs": {
+    "url": "https://github.com/platformparity/platformparity/issues"
+  },
+  "homepage": "https://github.com/platformparity/platformparity#readme"
 }
