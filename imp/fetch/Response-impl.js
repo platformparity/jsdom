@@ -8,6 +8,8 @@ const Response = require("../../lib/Response.js");
 
 const { STATUS_CODES } = require("http");
 
+const { format: formatURL, parse: parseURL } = require("url");
+
 const INTERNALS = Symbol("Response internals");
 
 class ResponseImpl {
@@ -29,6 +31,24 @@ class ResponseImpl {
     }
 
     this[INTERNALS] = { url, status, statusText, headers };
+  }
+
+  static error() {}
+
+  static redirect(url, status) {
+    // TODO: "current settings object’s API base URL"?
+    const parsedURL = parseURL(url);
+    if (parsedURL.auth) {
+      throw new TypeError("URL is not valid or contains user credentials");
+    }
+
+    if (!this.isRedirectStatus(status)) {
+      throw new RangeError("Status must be a redirect status");
+    }
+
+    const headers = Headers.createImpl([[["Location", formatURL(parsedURL)]]]);
+
+    return Response.createImpl([null, { url, status, headers }]);
   }
 
   get url() {
@@ -65,6 +85,16 @@ class ResponseImpl {
 
   isValidStatus(code) {
     return code >= 200 && code < 600;
+  }
+
+  static isRedirectStatus(code) {
+    return (
+      code === 301 ||
+      code === 302 ||
+      code === 303 ||
+      code === 307 ||
+      code === 308
+    );
   }
 
   isNullBodyStatus(code) {

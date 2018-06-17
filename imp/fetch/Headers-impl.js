@@ -6,6 +6,8 @@ const invalidHeaderCharRegex = /[^\t\x20-\x7e\x80-\xff]/;
 
 const MAP = Symbol("map");
 
+// TODO: guards? immutable?
+
 class HeadersImpl {
   constructor([init]) {
     this[MAP] = Object.create(null);
