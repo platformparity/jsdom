@@ -41,6 +41,8 @@ const SubtleCrypto = require("@trust/webcrypto/src/SubtleCrypto.js");
 const CryptoKey = require("@trust/webcrypto/src/keys/CryptoKey.js");
 const crypto = require("@trust/webcrypto");
 
+const { URL, URLSearchParams } = require("url");
+
 const {
   ReadableStream,
   WritableStream,
@@ -57,6 +59,8 @@ Object.assign(module.exports, {
   SubtleCrypto,
   CryptoKey,
   crypto,
+  URL,
+  URLSearchParams,
   ReadableStream,
   WritableStream,
   TransformStream,

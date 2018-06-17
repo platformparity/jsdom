@@ -11,7 +11,7 @@ const transformer = new Webidl2js({
   suppressErrors: true,
   // urlTypes: true,
   skipWrapReturn: false,
-  // skipConvertAny: true,
+  skipConvertAny: true,
   externalTypes: {
     url: ["URL", "URLSearchParams"],
     "@platformparity/streams": [
@@ -25,7 +25,7 @@ const transformer = new Webidl2js({
 });
 
 function addDir(dir) {
-  transformer.addSource(`idl/${dir}`, `imp/${dir}`);
+  transformer.addSource(`webidl/${dir}`, `impl/${dir}`);
 }
 
 addDir("abort-controller");
