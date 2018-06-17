@@ -61,7 +61,7 @@ class BodyImpl {
   // The method should consume the body first, then perform the algorithm.
   // However, since we have the handy `busboy` library that works on a stream,
   // we just pipe the body into it for now.
-  formData() {
+  multiPartFormData() {
     // TODO: same error as browser impls?
     // FIXME: DRY
     if (this.body.locked) {
@@ -117,6 +117,26 @@ class BodyImpl {
     });
   }
 
+  formData() {
+    if (this.mimeType.startsWith("multipart/form-data")) {
+      return this.multiPartFormData();
+    } else if (this.mimeType.startsWith("application/x-www-form-urlencoded")) {
+      return this.consumeBody().then(buffer => {
+        let entries;
+        try {
+          entries = new URLSearchParams(buffer.toString());
+        } catch (e) {
+          throw new TypeError(e.message);
+        }
+
+        const formData = FormData.createImpl([]);
+        for (const [k, v] of entries) formData.append(k, v);
+        return formData;
+      });
+    }
+    throw new TypeError();
+  }
+
   json() {
     return this.consumeBody().then(buffer => {
       return JSON.parse(buffer.toString());
@@ -144,6 +164,8 @@ class BodyImpl {
 
     if (mimeType !== null && !headers.has("Content-Type")) {
       headers.append("Content-Type", mimeType); // TODO: why append?
+    } else {
+      this[INTERNALS].mimeType = headers.get("Content-Type");
     }
 
     if (content != null) {
