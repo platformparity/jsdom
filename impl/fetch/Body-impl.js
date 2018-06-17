@@ -30,6 +30,7 @@ class BodyImpl {
   }
 
   get bodyUsed() {
+    if (!this[INTERNALS].body) return false;
     return this[INTERNALS].body._disturbed;
   }
 
@@ -46,9 +47,10 @@ class BodyImpl {
   }
 
   formData() {
-    if (this.mimeType.startsWith("multipart/form-data")) {
+    const mimeType = this.mimeType || "";
+    if (mimeType.startsWith("multipart/form-data")) {
       return this.multiPartFormData();
-    } else if (this.mimeType.startsWith("application/x-www-form-urlencoded")) {
+    } else if (mimeType.startsWith("application/x-www-form-urlencoded")) {
       return this.wwwFromURLEncoded();
     }
     throw new TypeError();
@@ -130,14 +132,13 @@ class BodyImpl {
 
   // https://fetch.spec.whatwg.org/#concept-body-consume-body
   consumeBody() {
+    const stream = this.body || this.emptyReadableStream();
+
     // TODO: same error as browser impls?
-    if (this.body.locked) {
-      return Promise.reject(new TypeError("body stream locked"));
-    } else if (this.body._disturbed) {
+    // FIXME: DRY
+    if (stream.locked || stream._disturbed) {
       return Promise.reject(new TypeError("body stream already read"));
     }
-
-    const stream = this.body || new ReadableStream();
 
     let reader;
     try {
@@ -162,6 +163,12 @@ class BodyImpl {
         throw new TypeError("not done and value not type of Uint8Array");
       }
     }
+  }
+
+  emptyReadableStream() {
+    const stream = new PassThrough();
+    stream.end("");
+    return readableStreamFromNode(stream);
   }
 
   /*
@@ -397,11 +404,11 @@ class BodyImpl {
   // However, since we have the handy `busboy` library that works on a stream,
   // we just pipe the body into it for now.
   multiPartFormData() {
+    const stream = this.body || this.emptyReadableStream();
+
     // TODO: same error as browser impls?
     // FIXME: DRY
-    if (this.body.locked) {
-      return Promise.reject(new TypeError("body stream locked"));
-    } else if (this.body._disturbed) {
+    if (stream.locked || stream._disturbed) {
       return Promise.reject(new TypeError("body stream already read"));
     }
 
