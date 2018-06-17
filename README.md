@@ -98,7 +98,7 @@ There's actually work to be done to alternate between polyfills and native impls
 - [x] `Response`
 - [x] `Request`
 - [x] `Headers`
-- [x] `fetch` (`formData()` not implemented; no static methods; various getters missing; bugs)
+- [x] `fetch` (no static methods; various getters missing; bugs)
 
 #### Form data (part of XHR)
 

@@ -2,16 +2,20 @@
 
 const Blob = require("../../lib/Blob.js");
 const FormData = require("../../lib/FormData.js");
+const File = require("../../lib/File.js");
 
 const { Buffer } = require("buffer");
 const Stream = require("stream");
 const { PassThrough } = Stream;
-
 const { URLSearchParams } = require("url");
+
 const {
   ReadableStream,
-  readableStreamFromNode
+  readableStreamFromNode,
+  writableStreamFromNode
 } = require("@platformparity/streams");
+
+const Busboy = require("busboy");
 
 const crypto = require("@trust/webcrypto");
 
@@ -53,8 +57,64 @@ class BodyImpl {
     );
   }
 
+  // TODO: This is not actually how the spec defines this.
+  // The method should consume the body first, then perform the algorithm.
+  // However, since we have the handy `busboy` library that works on a stream,
+  // we just pipe the body into it for now.
   formData() {
-    throw new Error("not implemented");
+    // TODO: same error as browser impls?
+    // FIXME: DRY
+    if (this.body.locked) {
+      return Promise.reject(new TypeError("body stream locked"));
+    } else if (this.body._disturbed) {
+      return Promise.reject(new TypeError("body stream already read"));
+    }
+
+    return new Promise((res, rej) => {
+      const formData = FormData.createImpl([]);
+
+      const busboy = new Busboy({
+        headers: { "content-type": this.mimeType }
+      });
+
+      busboy.on("file", (fieldname, file, filename, encoding, type) => {
+        const chunks = [];
+
+        file.on("data", data => {
+          // TODO: convert to utf-8?
+          chunks.push(data);
+        });
+
+        file.on("end", () => {
+          const file = File.createImpl([chunks, filename, { type }]);
+          formData.append(fieldname, file);
+        });
+
+        // TODO: error? what does the spec say?
+      });
+
+      busboy.on("field", (
+        fieldname,
+        val
+        /*fieldnameTruncated, valTruncated, encoding, mimetype*/
+      ) => {
+        // TODO: deal with truncated!?
+        // TODO: convert to utf-8?
+        // TODO: what about all these other parameters?
+        formData.append(fieldname, val);
+      });
+
+      busboy.on("finish", () => {
+        res(formData);
+      });
+
+      // TODO: what does the spec say?
+      busboy.on("error", e => {
+        rej(e);
+      });
+
+      this.body.pipeTo(writableStreamFromNode(busboy));
+    });
   }
 
   json() {
@@ -83,7 +143,7 @@ class BodyImpl {
     };
 
     if (mimeType !== null && !headers.has("Content-Type")) {
-      headers.append("Content-Type", mimeType); // FIXME: why append?
+      headers.append("Content-Type", mimeType); // TODO: why append?
     }
 
     if (content != null) {
@@ -131,7 +191,7 @@ class BodyImpl {
 
   // https://fetch.spec.whatwg.org/#concept-body-consume-body
   consumeBody() {
-    // FIXME: same error as browser impls?
+    // TODO: same error as browser impls?
     if (this.body.locked) {
       return Promise.reject(new TypeError("body stream locked"));
     } else if (this.body._disturbed) {
@@ -168,7 +228,7 @@ class BodyImpl {
   /*
   async readAllBytes(reader) {
     const bytes = [];
-    // FIXME: reader doesn't implement async iterable ?
+    // TODO: reader doesn't implement async iterable ?
     for await (const chunk of reader) {
       if (chunk instanceof Uint8Array) bytes.push(chunk);
       else throw new TypeError("chunk not type of Uint8Array");
@@ -187,7 +247,7 @@ class BodyImpl {
       return reader.read().then(({ value, done }) => {
         if (done === false && value instanceof Uint8Array) {
           bytes.push(value);
-          return pump(); // FIXME: maximum call stack size?
+          return pump(); // TODO: maximum call stack size?
         } else if (done === true) {
           return Buffer.concat(bytes);
         } else {

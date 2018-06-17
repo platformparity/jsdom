@@ -18,6 +18,7 @@
     "@platformparity/streams": "^1.0.0-wip.3",
     "@trust/webcrypto": "^0.9.2",
     "abab": "^2.0.0",
+    "busboy": "^0.2.14",
     "debug": "^3.1.0",
     "domexception": "^1.0.1",
     "encoding": "^0.1.12",
