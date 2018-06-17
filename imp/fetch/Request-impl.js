@@ -15,7 +15,11 @@ const INTERNALS = Symbol("Request internals");
 
 class RequestImpl {
   constructor([input, init = {}]) {
+    // TODO: "current settings object’s API base URL"?
     const parsedURL = parseURL(input.url || input);
+    if (parsedURL.auth) {
+      throw new TypeError("URL must not contain user credentials");
+    }
 
     const signal =
       init.signal || (input[INTERNALS] && input[INTERNALS].signal) || null;
@@ -23,7 +27,7 @@ class RequestImpl {
     const method = (init.method || input.method || "GET").toUpperCase();
 
     if (init.body != null && (method === "GET" || method === "HEAD")) {
-      throw new TypeError("Request with GET/HEAD method cannot have body.");
+      throw new TypeError("Request with GET/HEAD method cannot have body");
     }
 
     const headers = Headers.createImpl([init.headers || input.headers || {}]);

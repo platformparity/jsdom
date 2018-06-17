@@ -12,6 +12,10 @@ const INTERNALS = Symbol("Response internals");
 
 class ResponseImpl {
   constructor([body, init]) {
+    if (!this.isValidStatus(init.status)) {
+      throw new RangeError("Status must be between 200 and 599");
+    }
+
     const headers = Headers.createImpl([init.headers]);
 
     this.initBody(body, headers);
@@ -19,6 +23,10 @@ class ResponseImpl {
     const url = init.url || "";
     const status = init.status || 200;
     const statusText = init.statusText || STATUS_CODES[status];
+
+    if (body != null && this.isNullBodyStatus(init.status)) {
+      throw new TypeError("Response cannot have a body with the given status");
+    }
 
     this[INTERNALS] = { url, status, statusText, headers };
   }
@@ -51,6 +59,16 @@ class ResponseImpl {
     ]);
     this.cloneBodyTo(that);
     return that;
+  }
+
+  // PRIVATE METHDOS
+
+  isValidStatus(code) {
+    return code >= 200 && code < 600;
+  }
+
+  isNullBodyStatus(code) {
+    return code === 101 || code === 204 || code === 205 || code === 304;
   }
 }
 
