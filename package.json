@@ -24,14 +24,14 @@
     "encoding": "^0.1.12",
     "os-locale": "^2.1.0",
     "text-encoding": "^0.6.4",
-    "webidl-conversions": "github:platformparity/webidl-conversions#dd09029",
+    "webidl-conversions": "^4.0.2",
     "whatwg-encoding": "^1.0.3",
     "whatwg-mimetype": "^2.1.0",
     "whatwg-url": "^6.5.0"
   },
   "devDependencies": {
     "prettier": "^1.13.5",
-    "webidl2js": "platformparity/webidl2js#3f0af06"
+    "webidl2js": "github:platformparity/webidl2js#6c96843"
   },
   "scripts": {
     "test": "echo \"Warn: no test specified\" && exit 0",
